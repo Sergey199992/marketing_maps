@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Промо-карта · Отчет по расклейке</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--brand:#d61f5e;--brand-light:#ff6b9d;--brand-dark:#a01545;--bg:#f5f5f7;--panel:#fff;--panel2:#fafafa;--line:#e5e7eb;--text:#1a1a1a;--muted:#6b7280;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--info:#3b82f6;--purple:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh}
+header{flex:0 0 56px;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:0 2px 4px rgba(0,0,0,.05);z-index:1000}
+header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
+.search-box{flex:1;max-width:400px;position:relative}
+.search-box input{width:100%;padding:7px 34px 7px 10px;border:1px solid var(--line);border-radius:7px;font-size:13px;background:var(--bg)}
+.search-box input:focus{outline:none;border-color:var(--brand);background:var(--panel)}
+.search-box button{position:absolute;right:3px;top:50%;transform:translateY(-50%);background:var(--brand);color:#fff;border:0;border-radius:6px;padding:4px 9px;cursor:pointer;font-size:11px}
+.header-actions{margin-left:auto;display:flex;gap:6px;align-items:center}
+.header-btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px;transition:all .2s;white-space:nowrap}
+.header-btn:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.header-btn.active{background:var(--brand);color:#fff}
+.header-btn.selection-active{background:var(--warning);color:#fff;border-color:var(--warning);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.5)}50%{box-shadow:0 0 0 6px rgba(245,158,11,0)}}
+.header-btn.help-btn{margin-left:12px;background:#fff0f5;color:var(--brand);border:1px dashed var(--brand);font-weight:600}
+.header-btn.help-btn:hover{background:var(--brand);color:#fff;border-style:solid}
+.color-panel{display:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px;gap:4px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.color-panel.show{display:flex}
+.color-swatch{width:26px;height:26px;border-radius:4px;border:2px solid transparent;cursor:pointer;transition:all .2s;position:relative}
+.color-swatch:hover{transform:scale(1.15);border-color:var(--text);z-index:1}
+.color-swatch.selected{border-color:var(--text);box-shadow:0 0 0 2px var(--brand);transform:scale(1.1)}
+.color-swatch .swatch-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:3px 6px;border-radius:3px;font-size:10px;white-space:nowrap;pointer-events:none}
+.color-swatch:hover .swatch-tooltip{display:block}
+.size-control{display:flex;align-items:center;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+.size-control label{font-size:11px;color:var(--muted);white-space:nowrap}
+.size-control input[type=range]{width:60px;height:4px;cursor:pointer;accent-color:var(--brand)}
+.size-control .size-value{font-size:11px;font-weight:600;color:var(--brand);min-width:18px;text-align:center}
+.burger-btn{display:none;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 8px;cursor:pointer;font-size:18px}
+#workspace{flex:1;display:flex;position:relative;overflow:hidden}
+.sidebar{width:280px;background:var(--panel);border-right:1px solid var(--line);padding:14px;overflow-y:auto;box-shadow:2px 0 8px rgba(0,0,0,.05);z-index:800}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
+.upload-section{margin-bottom:12px;padding:14px;border:2px dashed var(--brand);border-radius:12px;background:#fff0f5;cursor:pointer;transition:all .2s}
+.upload-section:hover{background:#ffe0ec}
+.upload-section.drag-over{border-color:var(--brand-dark);background:#ffe0ec}
+.upload-btn{width:100%;padding:12px;background:var(--brand);color:#fff;border:0;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.upload-btn:hover{background:var(--brand-dark)}
+.upload-hint{text-align:center;font-size:11px;color:var(--muted);margin-top:6px;line-height:1.3}
+.stats-box{background:var(--panel2);border-radius:8px;padding:10px;margin-bottom:14px;border:1px solid var(--line)}
+.stats-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.stat-row{display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px}
+.stat-row:last-child{margin-bottom:0}
+.stat-label{color:var(--muted)}
+.stat-value{font-weight:700}
+.stat-value.success{color:var(--success)}
+.stat-value.warning{color:var(--warning)}
+.stat-value.danger{color:var(--danger)}
+.stat-value.purple{color:var(--purple)}
+.stat-value.info{color:var(--info)}
+.kml-group{border:2px dashed var(--purple);border-radius:12px;padding:10px;margin-bottom:10px;background:rgba(139,92,246,.04)}
+.kml-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kml-btn{width:100%;padding:9px;background:var(--panel);border:1px solid var(--line);border-radius:6px;cursor:pointer;font-size:12px;margin-bottom:4px;text-align:left;transition:all .2s;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.kml-btn:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.kml-btn .info-icon{font-size:13px;color:var(--muted);cursor:help;transition:all .2s;flex-shrink:0}
+.kml-btn:hover .info-icon{color:#fff}
+.collapsible-header{width:100%;padding:8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;text-align:left;transition:all .2s;display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.collapsible-header:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.collapsible-header .arrow{transition:transform .2s;font-size:10px}
+.collapsible-header.open .arrow{transform:rotate(180deg)}
+.collapsible-content{display:none;padding:6px 0 0}
+.collapsible-content.show{display:block}
+.group-box{border:2px dashed;border-radius:12px;padding:10px;margin-bottom:10px}
+.group-box.import{border-color:var(--info);background:rgba(59,130,246,.04)}
+.group-box.export{border-color:var(--success);background:rgba(16,185,129,.04)}
+.group-box.project{border-color:var(--warning);background:rgba(245,158,11,.04)}
+.group-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.group-btn{width:100%;padding:7px;background:var(--panel);border:1px solid var(--line);border-radius:6px;cursor:pointer;font-size:11px;margin-bottom:3px;text-align:left;transition:all .2s;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.group-btn:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.group-btn .info-icon{font-size:12px;color:var(--muted);cursor:help;transition:all .2s;flex-shrink:0}
+.group-btn:hover .info-icon{color:#fff}
+.csv-btn{background:#fff7ed!important;border-color:var(--warning)!important;color:var(--warning)!important;font-weight:600!important}
+.csv-btn:hover{background:var(--warning)!important;color:#fff!important}
+.danger-btn{width:100%;padding:9px;background:var(--danger);color:#fff;border:0;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;margin-top:12px;transition:all .2s}
+.danger-btn:hover{background:#dc2626}
+#map{flex:1;z-index:1}
+#map.selection-mode{cursor:crosshair!important}
+#map.selection-mode .leaflet-grab{cursor:crosshair!important}
+.basemap-selector{position:absolute;top:10px;right:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px;z-index:800;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.basemap-selector button{display:block;width:100%;padding:5px 9px;background:transparent;border:0;border-radius:6px;cursor:pointer;font-size:11px;text-align:left;margin-bottom:2px}
+.basemap-selector button:hover{background:var(--panel2)}
+.basemap-selector button.active{background:var(--brand);color:#fff}
+.cancel-manual-btn{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;border:0;border-radius:25px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(239,68,68,.4);z-index:900;display:none;transition:all .2s}
+.cancel-manual-btn.show{display:block}
+.cancel-manual-btn:hover{background:#dc2626;transform:translateX(-50%) scale(1.05)}
+.selection-indicator{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:var(--warning);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;box-shadow:0 4px 12px rgba(245,158,11,.4);z-index:900;display:none;animation:fadeIn .3s ease;text-align:center}
+.selection-indicator.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+.tooltip{position:fixed;background:var(--text);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;max-width:250px;z-index:10000;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.2);line-height:1.4}
+#toastContainer{position:fixed;right:12px;bottom:12px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:calc(100% - 24px)}
+.toast{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.15);min-width:200px;max-width:320px;animation:slideIn .3s ease;pointer-events:auto}
+.toast.success{border-left:4px solid var(--success)}
+.toast.error{border-left:4px solid var(--danger)}
+.toast.info{border-left:4px solid var(--info)}
+.toast.warning{border-left:4px solid var(--warning)}
+@keyframes slideIn{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(400px);opacity:0}}
+.toast.hiding{animation:slideOut .3s ease forwards}
+.leaflet-popup-content-wrapper{background:var(--panel);border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.leaflet-popup-content{margin:9px 11px;min-width:180px}
+.leaflet-popup-content img{max-width:100%;border-radius:6px;margin-top:7px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.popup-title{font-weight:700;color:var(--brand);margin-bottom:3px;font-size:13px}
+.popup-coords{font-size:10px;color:var(--muted);margin-bottom:3px}
+.popup-source{font-size:9px;font-style:italic;margin-bottom:3px;padding:2px 5px;background:var(--panel2);border-radius:4px;display:inline-block}
+.popup-source.exif{color:var(--success)}
+.popup-source.filename{color:var(--warning)}
+.popup-source.manual{color:var(--purple)}
+.popup-source.address{color:var(--info)}
+.delete-btn{background:var(--danger);color:#fff;border:0;border-radius:6px;padding:4px 9px;cursor:pointer;font-size:10px;margin-top:7px;width:100%}
+.delete-btn:hover{background:#dc2626}
+.leaflet-div-icon{background:transparent!important;border:0!important}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.modal.show{display:flex}
+.modal .box{background:var(--panel);border-radius:12px;padding:18px;max-width:600px;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2);width:100%}
+.modal h3{margin:0 0 10px;color:var(--brand);font-size:17px}
+.modal h4{margin:14px 0 6px;color:var(--brand);font-size:13px;font-weight:700}
+.modal h4.color-title{color:var(--warning)}
+.modal p,.modal ul,.modal ol{margin:6px 0;font-size:12px;line-height:1.5;color:var(--text)}
+.modal ul,.modal ol{padding-left:18px}
+.modal code{background:var(--panel2);padding:2px 5px;border-radius:4px;font-size:11px;font-family:monospace}
+.modal .version{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);text-align:center;font-size:11px;color:var(--muted)}
+.modal .version b{color:var(--brand)}
+.modal .actions{display:flex;gap:8px;margin-top:18px;justify-content:center}
+.modal .actions button{background:var(--brand);color:#fff;border:0;border-radius:6px;padding:7px 22px;cursor:pointer;font-weight:600;font-size:12px}
+.help-intro{padding:10px 12px;background:linear-gradient(135deg,#fff0f5 0%,#ffe0ec 100%);border-radius:8px;margin-bottom:10px;border-left:3px solid var(--brand)}
+.help-intro p{margin:3px 0;font-size:12px;line-height:1.5}
+.help-intro strong{color:var(--brand)}
+.help-functions-list{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:8px 0 12px;columns:2;column-gap:12px}
+.help-functions-list li{font-size:11px;padding:2px 0;break-inside:avoid;list-style:none;position:relative;padding-left:14px}
+.help-functions-list li::before{content:"•";color:var(--brand);font-weight:700;position:absolute;left:0}
+.help-section{margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.help-section:last-child{border-bottom:none}
+.progress-modal .box{max-width:400px;text-align:center}
+.progress-bar-container{width:100%;height:20px;background:var(--panel2);border-radius:10px;overflow:hidden;margin:16px 0;border:1px solid var(--line)}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-light));transition:width .3s ease;border-radius:10px}
+.progress-text{font-size:13px;color:var(--text);margin-bottom:8px}
+.progress-detail{font-size:11px;color:var(--muted);margin-bottom:16px;min-height:30px;word-break:break-word}
+.progress-actions{display:flex;gap:8px;justify-content:center}
+.progress-actions button{padding:8px 20px;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;border:0}
+.progress-cancel{background:var(--panel2);color:var(--text);border:1px solid var(--line)!important}
+.progress-cancel:hover{background:var(--danger);color:#fff}
+.not-found-list{max-height:200px;overflow-y:auto;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px;margin:10px 0;font-size:11px;font-family:monospace}
+.not-found-list div{padding:3px 0;border-bottom:1px solid var(--line)}
+.not-found-list div:last-child{border-bottom:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:799}
+.sidebar-overlay.show{display:block}
+@media(max-width:768px){header h1{font-size:13px}.search-box{max-width:none}.size-control{display:none}.burger-btn{display:block}.header-btn:not(.burger-btn){padding:5px 7px;font-size:11px}.header-btn.help-btn{margin-left:8px}.sidebar{position:fixed;left:0;top:56px;bottom:0;width:100%;max-width:320px;transform:translateX(-100%);transition:transform .3s;z-index:800}.sidebar.show{transform:translateX(0)}.basemap-selector{top:8px;right:8px}.basemap-selector button{font-size:10px;padding:4px 7px}#toastContainer{right:8px;bottom:8px;left:8px}.toast{max-width:none}.cancel-manual-btn{bottom:80px;padding:10px 20px;font-size:13px}.color-panel{position:fixed;top:64px;right:8px;z-index:1001;flex-wrap:wrap;max-width:280px}.selection-indicator{top:60px;font-size:11px;padding:6px 12px;max-width:90%;white-space:normal}.help-functions-list{columns:1}}
+@media(max-width:480px){header{padding:0 8px;gap:5px}header h1{font-size:12px}.header-btn{padding:4px 6px;font-size:10px}.search-box input{padding:6px 30px 6px 8px;font-size:12px}.search-box button{padding:3px 7px;font-size:10px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+<button class="burger-btn" onclick="toggleSidebar()">☰</button>
+<h1>📍 Промо-карта</h1>
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="🔍 Город или координаты">
+<button onclick="searchLocation()">Найти</button>
+</div>
+<div class="header-actions">
+<div class="size-control">
+<label>Точки:</label>
+<input type="range" id="sizeSlider" min="4" max="16" value="8" oninput="updateMarkerSize(this.value)">
+<span class="size-value" id="sizeValue">8</span>
+</div>
+<button class="header-btn" id="manualBtn" onclick="toggleManualMode()" title="Ручное добавление точек">✋ Вручную</button>
+<button class="header-btn" id="selectionBtn" onclick="toggleSelectionMode(event)" title="Выделить и перекрасить точки">🎯 Выделить</button>
+<div class="color-panel" id="colorPanel"></div>
+<button class="header-btn help-btn" onclick="toggleHelp()" title="Справка">❓ Справка</button>
+</div>
+</header>
+<div id="workspace">
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar" id="sidebar">
+<div class="upload-section" id="uploadSection">
+<button class="upload-btn" id="uploadBtn">📷 Загрузить фото</button>
+<div class="upload-hint">Перетащите файлы сюда или нажмите<br><small>Отправляйте как ФАЙЛ (не фото!)</small></div>
+<input type="file" id="fileInput" accept="image/*" multiple hidden>
+</div>
+<div class="stats-box">
+<div class="stats-title">📊 Статистика</div>
+<div class="stat-row"><span class="stat-label">📍 Точек:</span><span class="stat-value" id="totalCount" style="color:var(--brand)">0</span></div>
+<div class="stat-row"><span class="stat-label">✅ EXIF:</span><span class="stat-value success" id="fromExifCount">0</span></div>
+<div class="stat-row"><span class="stat-label">📝 Название:</span><span class="stat-value warning" id="fromFilenameCount">0</span></div>
+<div class="stat-row"><span class="stat-label">📍 Адреса:</span><span class="stat-value info" id="fromAddressCount">0</span></div>
+<div class="stat-row"><span class="stat-label">✋ Вручную:</span><span class="stat-value purple" id="fromManualCount">0</span></div>
+<div class="stat-row"><span class="stat-label">❌ Без GPS:</span><span class="stat-value danger" id="noGpsCount">0</span></div>
+</div>
+<div class="kml-group">
+<div class="kml-title">🌈 KML ЯНДЕКС (ОСНОВНОЕ)</div>
+<button class="kml-btn" onclick="document.getElementById('kmlInputColor').click()" onmouseenter="showTooltip(event,'Импорт цветного KML из Яндекс Конструктора карт. Цвета точек автоматически применяются к маркерам на карте.')" onmouseleave="hideTooltip()"><span>Импорт цветной KML</span><span class="info-icon">ⓘ</span></button>
+<input type="file" id="kmlInputColor" accept=".kml,.kmz" hidden>
+<button class="kml-btn" onclick="exportKMLColor()" onmouseenter="showTooltip(event,'Экспорт точек в цветной KML для Яндекс Конструктора карт. Все цвета точек сохраняются.')" onmouseleave="hideTooltip()"><span>Экспорт цветной KML</span><span class="info-icon">ⓘ</span></button>
+</div>
+<button class="collapsible-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('show')"><span>⚙️ Дополнительно</span><span class="arrow">▼</span></button>
+<div class="collapsible-content">
+<div class="group-box import">
+<div class="group-title">📥 ИМПОРТ</div>
+<button class="group-btn" onclick="document.getElementById('kmlInput').click()" onmouseenter="showTooltip(event,'Импорт стандартного одноцветного KML.')" onmouseleave="hideTooltip()"><span>Импорт одноцветного KML</span><span class="info-icon">ⓘ</span></button>
+<input type="file" id="kmlInput" accept=".kml,.kmz" hidden>
+<button class="group-btn" onclick="document.getElementById('txtInputCoords').click()" onmouseenter="showTooltip(event,'Импорт координат из TXT. Формат: широта,долгота')" onmouseleave="hideTooltip()"><span>Импорт координат TXT</span><span class="info-icon">ⓘ</span></button>
+<input type="file" id="txtInputCoords" accept=".txt" hidden>
+<button class="group-btn" onclick="document.getElementById('txtInputAddresses').click()" onmouseenter="showTooltip(event,'Импорт адресов из TXT. ~1 сек на адрес.')" onmouseleave="hideTooltip()"><span>Импорт адреса TXT</span><span class="info-icon">ⓘ</span></button>
+<input type="file" id="txtInputAddresses" accept=".txt" hidden>
+</div>
+<div class="group-box export">
+<div class="group-title">📤 ЭКСПОРТ</div>
+<button class="group-btn" onclick="exportKML()" onmouseenter="showTooltip(event,'Экспорт одноцветного KML.')" onmouseleave="hideTooltip()"><span>Экспорт одноцветного KML</span><span class="info-icon">ⓘ</span></button>
+<button class="group-btn" onclick="exportTXTCoords()" onmouseenter="showTooltip(event,'Экспорт координат в TXT.')" onmouseleave="hideTooltip()"><span>Экспорт координат TXT</span><span class="info-icon">ⓘ</span></button>
+<button class="group-btn" onclick="exportTXTAddresses()" onmouseenter="showTooltip(event,'Экспорт адресов в TXT.')" onmouseleave="hideTooltip()"><span>Экспорт адреса TXT</span><span class="info-icon">ⓘ</span></button>
+<button class="group-btn csv-btn" onclick="exportCSVWithAddresses()" onmouseenter="showTooltip(event,'Экспорт CSV для Excel с адресами.')" onmouseleave="hideTooltip()"><span>Экспорт CSV (адрес+коор.)</span><span class="info-icon">ⓘ</span></button>
+</div>
+<div class="group-box project">
+<div class="group-title">💾 ПРОЕКТ</div>
+<button class="group-btn" onclick="saveProject()" onmouseenter="showTooltip(event,'Сохранить проект в JSON.')" onmouseleave="hideTooltip()"><span>Сохранить проект</span><span class="info-icon">ⓘ</span></button>
+<button class="group-btn" onclick="document.getElementById('projInput').click()" onmouseenter="showTooltip(event,'Открыть проект из JSON.')" onmouseleave="hideTooltip()"><span>Открыть проект</span><span class="info-icon">ⓘ</span></button>
+<input type="file" id="projInput" accept=".json" hidden>
+</div>
+</div>
+<button class="danger-btn" onclick="clearAll()">🗑 Очистить всё</button>
+</div>
+<div id="map"></div>
+<div class="selection-indicator" id="selectionIndicator">🎯 Режим выделения · Нарисуйте прямоугольник мышью на карте</div>
+<div class="basemap-selector">
+<button data-basemap="osm" class="active" onclick="setBasemap('osm')">OpenStreetMap</button>
+<button data-basemap="2gis" onclick="setBasemap('2gis')">2GIS</button>
+<button data-basemap="google" onclick="setBasemap('google')">Google схема</button>
+<button data-basemap="google_satellite" onclick="setBasemap('google_satellite')">Google спутник</button>
+<button data-basemap="google_hybrid" onclick="setBasemap('google_hybrid')">Google гибрид</button>
+</div>
+<button class="cancel-manual-btn" id="cancelManualBtn" onclick="toggleManualMode()">✕ Отменить ручное добавление</button>
+</div>
+</div>
+<div id="tooltip" class="tooltip" style="display:none"></div>
+<div id="toastContainer"></div>
+<div class="modal" id="helpModal"><div class="box">
+<h3>📘 СПРАВКА · Промо-карта</h3>
+<div class="version">Версия: <b>v.YS2026_06_19_marketing_v15</b></div>
+<div class="help-intro">
+<p><strong>Промо-карта</strong> — веб-приложение для контроля расклейки рекламных материалов и формирования отчётности.</p>
+<p>Автоматически размещает на карте точки по фотографиям с GPS-координатами, адресам или координатам из файлов. Работает в любом браузере без установки.</p>
+<p><strong>Для кого:</strong> маркетологи, бригады расклейки, руководители проектов наружной рекламы.</p>
+</div>
+<h4>🎯 Какие задачи решает</h4>
+<div class="help-section"><ul>
+<li>Контроль факта расклейки по фотоотчёту от бригад</li>
+<li>Автоматическое формирование отчёта в Excel (CSV)</li>
+<li>Визуализация всех точек на одной карте</li>
+<li>Классификация точек цветом (сделано / не сделано / конкуренты)</li>
+<li>Обмен проектами между сотрудниками</li>
+<li>Анализ покрытия и зон без расклейки</li>
+</ul></div>
+<h4>📋 Функции приложения</h4>
+<ul class="help-functions-list">
+<li>Загрузка фото с GPS</li>
+<li>Ручное добавление точек</li>
+<li>Выделение и раскраска групп</li>
+<li>Импорт цветного KML (Яндекс)</li>
+<li>Экспорт цветного KML (Яндекс)</li>
+<li>Импорт одноцветного KML</li>
+<li>Экспорт одноцветного KML</li>
+<li>Импорт TXT (координаты)</li>
+<li>Импорт TXT (адреса)</li>
+<li>Экспорт TXT (координаты)</li>
+<li>Экспорт TXT (адреса)</li>
+<li>Экспорт CSV (главный отчёт)</li>
+<li>Сохранение/открытие проекта</li>
+<li>Поиск городов и адресов</li>
+<li>5 подложек карт</li>
+<li>Настройка размера точек</li>
+</ul>
+<h4>📖 Описание функций</h4>
+<div class="help-section">
+<p><b>📷 Загрузка фото</b> — основной способ добавления точек. Поддерживаются JPG/JPEG, загружаются сотнями файлов за раз с прогресс-баром. Координаты берутся из метаданных или из имени файла (двойная защита).</p>
+<p><b>✋ Ручное добавление точек</b> — нажмите кнопку <code>✋ Вручную</code>, затем кликайте по карте в нужных местах. Для выхода — повторное нажатие или клавиша <code>ESC</code>.</p>
+<p><b>🎯 Выделение и раскраска</b> — нажмите <code>🎯 Выделить</code>, выберите цвет из палитры и нарисуйте прямоугольник мышью вокруг группы точек. Все точки внутри автоматически перекрасятся.</p>
+<p><b>🌈 KML Яндекс (цветной)</b> — основной формат обмена с Яндекс Конструктором карт. При импорте сохраняются цвета точек из Яндекса, при экспорте — ваши цвета корректно отображаются в Яндекс Конструкторе.</p>
+<p><b>🌐 KML одноцветный</b> — стандартный формат KML без сохранения цветов. Используется для совместимости с другими системами.</p>
+<p><b>🔢 TXT координаты</b> — простой список, каждая строка содержит <code>широта,долгота</code>. Подходит для обмена с подрядчиками.</p>
+<p><b>📍 TXT адреса</b> — список адресов, по одному на строку. При импорте адреса автоматически геокодируются в координаты (≈1 сек на адрес).</p>
+<p><b>📋 CSV (главный отчёт)</b> — итоговый файл для Excel с колонками: Район, Адрес, Широта, Долгота, Фото, Вид рекламы, Дата, Комментарий.</p>
+<p><b>💾 Проект (JSON)</b> — полное сохранение всех данных: точки, фото, настройки, цвета.</p>
+<p><b>🔍 Поиск</b> — поле поиска принимает название города, улицу или координаты. Нажмите <code>Enter</code>.</p>
+<p><b>🗺 Подложки карт</b> — 5 вариантов: OpenStreetMap, 2GIS, Google схема, Google спутник, Google гибрид.</p>
+<p><b>🔧 Размер точек</b> — ползунок в шапке меняет размер маркеров.</p>
+</div>
+<h4 class="color-title">📱 Как правильно фотографировать</h4>
+<div class="help-section">
+<p>Используйте приложение <b>Conota Camera</b> (бесплатно, Android/iOS). В настройках <b>обязательно включите:</b></p>
+<ul>
+<li>✅ <b>Координаты на фото</b> (Водяной знак) — координаты пропечатываются прямо на снимке</li>
+<li>✅ <b>Координаты в имени файла</b> — название файла становится вида <code>57.33402,61.92401_фото.jpg</code></li>
+</ul>
+<p><b>Почему это важно:</b> это двойная защита. Если GPS-метаданные потеряются при передаче — координаты автоматически возьмутся из имени файла.</p>
+</div>
+<h4>⚠️ Как передавать фото без потери GPS</h4>
+<div class="help-section">
+<p><b>🥇 Надёжные способы</b> (метаданные гарантированно сохраняются):</p>
+<ul><li>Облачные хранилища: Яндекс.Диск, Google Диск, Dropbox</li><li>Прямая передача: USB-кабель, AirDrop, Bluetooth</li><li>Email: отправляйте фото как вложения</li></ul>
+<p><b>🥈 Через мессенджеры</b> — только как файлы, НЕ как фото из галереи:</p>
+<ul><li><b>Telegram:</b> 📎 → Файл (НЕ Галерея!)</li><li><b>WhatsApp:</b> 📎 → Документ</li></ul>
+<p>При отправке фото из галереи мессенджеры удаляют метаданные — координаты будут потеряны.</p>
+</div>
+<h4>📊 Источники точек (видно в статистике)</h4>
+<div class="help-section"><ul>
+<li><b style="color:var(--success)">✅ EXIF</b> — координаты из метаданных фото (самый надёжный)</li>
+<li><b style="color:var(--warning)">📝 Название</b> — восстановленные из имени файла</li>
+<li><b style="color:var(--info)">📍 Адреса</b> — из импорта TXT-адресов</li>
+<li><b style="color:var(--purple)">✋ Вручную</b> — клик по карте, KML/TXT импорт</li>
+<li><b style="color:var(--danger)">❌ Без GPS</b> — фото без координат (не отображаются)</li>
+</ul></div>
+<h4>🎯 Типовые сценарии использования</h4>
+<div class="help-section">
+<p><b>🕵️ Анализ конкурентов.</b> Загрузите KML конкурентов из Яндекс Конструктора — увидите где они работают и где есть свободные зоны.</p>
+<p><b>📊 Сверка с базой.</b> Выгрузите из Excel адреса → импорт TXT → карта → экспорт CSV обратно → сверка.</p>
+<p><b>🔧 Восстановление битых фото.</b> Если фото потеряли GPS — переименуйте в <code>57.33402,61.92401_фото.jpg</code> и загрузите заново.</p>
+<p><b>⚡ Быстрая повторная выгрузка.</b> Адреса кэшируются — вторая выгрузка CSV тех же точек происходит мгновенно.</p>
+<p><b>📸 Массовая загрузка.</b> 500+ фото за раз обрабатываются порциями с прогресс-баром.</p>
+</div>
+<h4>🔧 Горячие клавиши</h4>
+<div class="help-section"><ul>
+<li><b>ESC</b> — выйти из ручного режима / режима выделения / закрыть окно</li>
+<li><b>Enter</b> в поле поиска — найти адрес или координаты</li>
+</ul></div>
+<div class="actions"><button onclick="document.getElementById('helpModal').classList.remove('show')">Закрыть</button></div>
+</div></div>
+<div class="modal progress-modal" id="progressModal"><div class="box">
+<h3 id="progressTitle">🗺 Обработка</h3>
+<div class="progress-text" id="progressText">Подготовка...</div>
+<div class="progress-bar-container"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+<div class="progress-detail" id="progressDetail"></div>
+<div class="progress-actions"><button class="progress-cancel" id="progressCancelBtn" onclick="cancelOperation()">Отмена</button></div>
+</div></div>
+<div class="modal" id="detailsModal"><div class="box">
+<h3 id="detailsTitle">⚠️ Информация</h3>
+<div id="detailsStats" style="margin:10px 0;font-size:13px"></div>
+<div class="not-found-list" id="detailsList"></div>
+<div class="actions"><button onclick="copyDetailsList()">📋 Скопировать</button><button onclick="document.getElementById('detailsModal').classList.remove('show')">Закрыть</button></div>
+</div></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/exif-js@2.3.0/exif.js"></script>
+<script>
+(function(){
+'use strict';
+const V='v.YS2026_06_19_marketing_v15',SK='promo_v27',CK='promo_addr_v2';
+const CP=[{hex:'#ed4543',name:'Красный'},{hex:'#ff931e',name:'Оранжевый'},{hex:'#ffd21e',name:'Жёлтый'},{hex:'#1bad03',name:'Зелёный'},{hex:'#56db40',name:'Светло-зелёный'},{hex:'#1e98ff',name:'Синий'},{hex:'#82cdff',name:'Голубой'},{hex:'#b51eff',name:'Фиолетовый'},{hex:'#f371d1',name:'Розовый'},{hex:'#595959',name:'Серый'}];
+const DC='#d61f5e';
+const U={
+esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))},
+dms(d,r){if(!Array.isArray(d)||d.length<3)return typeof d==='number'?(r==='S'||r==='W'?-Math.abs(d):d):NaN;const n=v=>typeof v==='number'?v:(v&&v.numerator?v.numerator/(v.denominator||1):Number(v)||0);const v=n(d[0])+n(d[1])/60+n(d[2])/3600;return(r==='S'||r==='W')?-v:v},
+parseFn(fn){if(!fn)return null;const nm=fn.replace(/\.[^/.]+$/,'');let m=nm.match(/(\d{2}\.\d{4,6})\s*[°]?\s*[СCсcNn]\s+(\d{2}\.\d{4,6})\s*[°]?\s*[ЕEеeвВ]/);if(m){const a=parseFloat(m[1]),b=parseFloat(m[2]);if(isFinite(a)&&isFinite(b)&&a>=-90&&a<=90&&b>=-180&&b<=180)return{lat:a,lng:b}}m=nm.match(/(\d{2}\.\d{4,6})\s*[,;]\s*(\d{2}\.\d{4,6})/);if(m){const a=parseFloat(m[1]),b=parseFloat(m[2]);if(isFinite(a)&&isFinite(b)&&a>=-90&&a<=90&&b>=-180&&b<=180)return{lat:a,lng:b}}return null},
+zeroGps(v){if(!v)return true;if(typeof v==='number')return Math.abs(v)<.0001;if(Array.isArray(v))return v.every(x=>{const n=typeof x==='number'?x:(x&&x.numerator?x.numerator/(x.denominator||1):0);return Math.abs(n)<.0001});return true},
+dup(a,b){return S.points.some(p=>Math.abs(p.lat-a)<.00001&&Math.abs(p.lng-b)<.00001)},
+ck(a,b){return a.toFixed(5)+','+b.toFixed(5)},
+y2h(c){if(!c||c.length!==8)return DC;const bb=c.substring(2,4),gg=c.substring(4,6),rr=c.substring(6,8);return'#'+rr+gg+bb},
+h2y(h){if(!h||h.length!==7)return'ff5e1fd6';const rr=h.substring(1,3),gg=h.substring(3,5),bb=h.substring(5,7);return'ff'+bb+gg+rr}
+};
+const UI={toast(m,t='info',d=3000){const e=document.createElement('div');e.className='toast '+t;e.textContent=m;document.getElementById('toastContainer').appendChild(e);setTimeout(()=>{e.classList.add('hiding');setTimeout(()=>e.remove(),300)},d)}};
+window.showTooltip=function(e,t){const tip=document.getElementById('tooltip');tip.textContent=t;tip.style.display='block';const r=e.target.getBoundingClientRect();tip.style.left=(r.right+10)+'px';tip.style.top=r.top+'px';if(r.right+260>window.innerWidth)tip.style.left=(r.left-260-10)+'px'};
+window.hideTooltip=function(){document.getElementById('tooltip').style.display='none'};
+const ST={save(p){try{localStorage.setItem(SK,JSON.stringify(p))}catch(e){}},load(){try{const s=localStorage.getItem(SK);return s?JSON.parse(s):null}catch(e){return null}},gc(){try{const s=localStorage.getItem(CK);return s?JSON.parse(s):{}}catch(e){return{}}},sc(c){try{localStorage.setItem(CK,JSON.stringify(c))}catch(e){}}};
+const S={points:[],noGps:[],counter:0,manual:false,basemap:'osm',first:false,ms:8,selMode:false,selPts:[],actColor:CP[0].hex,selRect:null,selStart:null,isDraw:false};
+const BM={osm:{u:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxZoom:19,attribution:'© OSM'}},'2gis':{u:'https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}',o:{maxZoom:18,attribution:'© 2GIS'}},google:{u:'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',o:{maxZoom:21,attribution:'© Google'}},google_satellite:{u:'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',o:{maxZoom:21,attribution:'© Google'}},google_hybrid:{u:'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',o:{maxZoom:21,attribution:'© Google'}}};
+let map,tile,curOp=null;
+const sl=ms=>new Promise(r=>setTimeout(r,ms));
+async function rg(a,b,c){const k=U.ck(a,b);if(c[k])return c[k];try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${a}&lon=${b}&zoom=18&addressdetails=1&accept-language=ru`,{headers:{'User-Agent':'PromoMap/1.0'}});if(!r.ok)throw 0;const d=await r.json();let res={city:'Не определен',address:'Адрес не найден',found:false};if(d?.address){const x=d.address;res.city=x.city||x.town||x.village||x.hamlet||x.suburb||x.state||'Не определен';const rd=x.road||x.pedestrian||'';const hs=x.house_number||'';const bld=x.building&&x.building!=='yes'?x.building:'';if(rd){res.address=rd+(hs?', '+hs:'')+(bld&&!hs?' ('+bld+')':'');res.found=true}else if(bld&&bld!=='yes'){res.address=bld;res.found=true}else if(x.suburb||x.neighbourhood){res.address=x.suburb||x.neighbourhood;res.found=true}}c[k]=res;ST.sc(c);return res}catch(e){const f={city:'Ошибка',address:'Адрес не найден',found:false};c[k]=f;return f}}
+async function fg(addr){try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(addr)}&limit=1&countrycodes=ru&addressdetails=1&accept-language=ru`,{headers:{'User-Agent':'PromoMap/1.0'}});if(!r.ok)throw 0;const d=await r.json();if(d?.length>0)return{found:true,lat:parseFloat(d[0].lat),lng:parseFloat(d[0].lon),dn:d[0].display_name};return{found:false}}catch(e){return{found:false}}}
+window._dl=[];
+function sdm(t,items,desc){const m=document.getElementById('detailsModal');document.getElementById('detailsTitle').textContent=t;document.getElementById('detailsStats').innerHTML=`<b>Количество:</b> ${items.length}<br><small>${desc}</small>`;document.getElementById('detailsList').innerHTML=items.map(i=>`<div>${U.esc(i)}</div>`).join('');m.classList.add('show');window._dl=items}
+window.copyDetailsList=function(){if(window._dl?.length)navigator.clipboard.writeText(window._dl.join('\n')).then(()=>UI.toast('Скопировано','success')).catch(()=>UI.toast('Ошибка копирования','error'))};
+const BP={
+async photos(files,bs=10){const md=document.getElementById('progressModal'),pb=document.getElementById('progressBar'),pt=document.getElementById('progressText'),pd=document.getElementById('progressDetail'),cb=document.getElementById('progressCancelBtn'),ti=document.getElementById('progressTitle');md.classList.add('show');ti.textContent='📷 Загрузка фотографий';pt.textContent='Подготовка...';pd.textContent='';cb.style.display='inline-block';cb.textContent='Отмена';const arr=[...files].filter(f=>f.type.startsWith('image/'));if(!arr.length){UI.toast('Не изображения','error');md.classList.remove('show');return}let eX=0,fN=0,nG=0,dup=0;const nL=[],dL=[];let cancelled=false;curOp=()=>{cancelled=true};const tot=arr.length;for(let i=0;i<tot;i+=bs){if(cancelled){pt.textContent='Отменено';await sl(1500);md.classList.remove('show');curOp=null;return}const batch=arr.slice(i,i+bs);const res=await Promise.all(batch.map(f=>PM.one(f)));res.forEach((r,idx)=>{const f=batch[idx];if(r==='exif')eX++;else if(r==='filename')fN++;else if(r==='duplicate'){dup++;dL.push(f.name)}else{nG++;nL.push(f.name)}});const pct=Math.round(((i+batch.length)/tot)*100);pb.style.width=pct+'%';pt.textContent=`Загрузка ${i+batch.length} из ${tot} (${pct}%)`;pd.textContent=`EXIF: ${eX} | Название: ${fN} | Без GPS: ${nG} | Дублей: ${dup}`;await sl(100)}pt.textContent='✓ Завершено!';pd.textContent=`EXIF: ${eX}, Название: ${fN}, Без GPS: ${nG}, Дублей: ${dup}`;cb.style.display='none';curOp=null;await sl(1000);md.classList.remove('show');let msg=`Загружено ${tot} фото`;if(eX)msg+=`, ${eX} EXIF ✓`;if(fN)msg+=`, ${fN} название ✓`;if(dup)msg+=`, ${dup} дублей`;if(nG)msg+=`, ${nG} без GPS`;UI.toast(msg,(eX+fN)>0?'success':'warning',5000);if(nL.length)setTimeout(()=>sdm('❌ Фото без геолокации',nL,'Переименуйте в "широта,долгота_имя.jpg"'),500);if(dL.length&&!nL.length)setTimeout(()=>sdm('⚠️ Дубликаты',dL,'Уже есть на карте.'),500)},
+async kml(file,bs=50,wc=false){const md=document.getElementById('progressModal'),pb=document.getElementById('progressBar'),pt=document.getElementById('progressText'),pd=document.getElementById('progressDetail'),cb=document.getElementById('progressCancelBtn'),ti=document.getElementById('progressTitle');md.classList.add('show');ti.textContent=wc?'🌈 Импорт цветной KML':'🌐 Импорт одноцветного KML';pt.textContent='Чтение...';pd.textContent='';cb.style.display='inline-block';cb.textContent='Отмена';let cancelled=false;curOp=()=>{cancelled=true};try{const txt=await file.text();const doc=new DOMParser().parseFromString(txt,'text/xml');if(doc.querySelector('parsererror'))throw new Error('Некорректный KML');const pms=doc.getElementsByTagName('Placemark');const pts=[];for(const pm of pms){const pn=pm.getElementsByTagName('Point')[0];if(!pn)continue;const cn=pn.getElementsByTagName('coordinates')[0];if(!cn)continue;const p=cn.textContent.trim().split(',');const lng=parseFloat(p[0]),lat=parseFloat(p[1]);if(!isFinite(lat)||!isFinite(lng))continue;const nm=pm.getElementsByTagName('name')[0]?.textContent?.trim()||'';let color=DC;if(wc){const st=pm.getElementsByTagName('Style')[0];if(st){const is=st.getElementsByTagName('IconStyle')[0];if(is){const c=is.getElementsByTagName('color')[0];if(c)color=U.y2h(c.textContent.trim())}}}pts.push({lat,lng,name:nm,color})}if(!pts.length){UI.toast('Точек не найдено','error');md.classList.remove('show');curOp=null;return}pt.textContent=`Найдено ${pts.length} точек...`;let added=0,skipped=0;const dL=[];const tot=pts.length;for(let i=0;i<tot;i+=bs){if(cancelled){pt.textContent='Отменено';await sl(1500);md.classList.remove('show');curOp=null;return}pts.slice(i,i+bs).forEach(p=>{if(M.add(p.lat,p.lng,null,'kml',p.name,p.color))added++;else{skipped++;dL.push(p.name||`${p.lat.toFixed(5)},${p.lng.toFixed(5)}`)}});const pct=Math.round(((i+bs)/tot)*100);pb.style.width=pct+'%';pt.textContent=`Импорт ${Math.min(i+bs,tot)} из ${tot} (${pct}%)`;pd.textContent=`Добавлено: ${added} | Дублей: ${skipped}`;await sl(50)}pt.textContent='✓ Завершено!';pd.textContent=`Импортировано ${added} точек`;cb.style.display='none';curOp=null;await sl(1000);md.classList.remove('show');let msg=`Импортировано ${added}`;if(skipped)msg+=`, ${skipped} дублей`;UI.toast(msg,'success');if(S.points.length&&added>0)map.fitBounds(L.latLngBounds(S.points.map(p=>[p.lat,p.lng])).pad(.2));if(dL.length)setTimeout(()=>sdm('⚠️ Дубликаты (KML)',dL,'Уже есть на карте.'),500)}catch(e){md.classList.remove('show');curOp=null;UI.toast('Ошибка: '+e.message,'error')}},
+async addrTxt(file){const md=document.getElementById('progressModal'),pb=document.getElementById('progressBar'),pt=document.getElementById('progressText'),pd=document.getElementById('progressDetail'),cb=document.getElementById('progressCancelBtn'),ti=document.getElementById('progressTitle');md.classList.add('show');ti.textContent='📍 Импорт адресов';pt.textContent='Чтение...';pd.textContent='';cb.style.display='inline-block';cb.textContent='Отмена';let cancelled=false;curOp=()=>{cancelled=true};try{const txt=await file.text();const addrs=txt.split('\n').map(l=>l.trim()).filter(l=>l);if(!addrs.length){UI.toast('Адресов не найдено','error');md.classList.remove('show');curOp=null;return}pt.textContent=`Найдено ${addrs.length} адресов...`;let added=0,nf=0,dup=0;const nL=[],dL=[];const tot=addrs.length;for(let i=0;i<tot;i++){if(cancelled){pt.textContent='Отменено';await sl(1500);md.classList.remove('show');curOp=null;return}const pct=Math.round(((i+1)/tot)*100);pb.style.width=pct+'%';pt.textContent=`${i+1} из ${tot} (${pct}%)`;pd.textContent=`Адрес: ${addrs[i]}`;const r=await fg(addrs[i]);if(r.found){if(M.add(r.lat,r.lng,null,'address',addrs[i])){added++;pd.textContent=`✓ ${r.dn}`}else{dup++;dL.push(addrs[i])}}else{nf++;nL.push(addrs[i]);pd.textContent=`✗ ${addrs[i]}`}await sl(1000)}pt.textContent='✓ Завершено!';pd.textContent=`Добавлено: ${added} | Не найдено: ${nf} | Дублей: ${dup}`;cb.style.display='none';curOp=null;await sl(1000);md.classList.remove('show');let msg=`Импортировано ${added} адресов`;if(nf)msg+=`, ${nf} не найдено`;if(dup)msg+=`, ${dup} дублей`;UI.toast(msg,added>0?'success':'warning',5000);if(S.points.length&&added>0)map.fitBounds(L.latLngBounds(S.points.map(p=>[p.lat,p.lng])).pad(.2));if(nL.length)setTimeout(()=>sdm('❌ Не найдены',nL,'Проверьте правильность.'),500)}catch(e){md.classList.remove('show');curOp=null;UI.toast('Ошибка: '+e.message,'error')}},
+async coordTxt(file){try{const txt=await file.text();const lines=txt.split('\n').map(l=>l.trim()).filter(l=>l);let added=0,skipped=0,inv=0;const dL=[],iL=[];lines.forEach((l,i)=>{const p=l.split(/[,;\s]+/);if(p.length>=2){const a=parseFloat(p[0]),b=parseFloat(p[1]);if(isFinite(a)&&isFinite(b)&&a>=-90&&a<=90&&b>=-180&&b<=180){if(M.add(a,b,null,'txt',`Строка ${i+1}`))added++;else{skipped++;dL.push(`Строка ${i+1}: ${a.toFixed(6)}, ${b.toFixed(6)}`)}}else{inv++;iL.push(`Строка ${i+1}: ${l}`)}}else if(l){inv++;iL.push(`Строка ${i+1}: ${l}`)}});if(!added&&!inv){UI.toast('Координат не найдено','error');return}let msg=`Импортировано ${added}`;if(skipped)msg+=`, ${skipped} дублей`;if(inv)msg+=`, ${inv} некорректных`;UI.toast(msg,added>0?'success':'warning');if(S.points.length&&added>0)map.fitBounds(L.latLngBounds(S.points.map(p=>[p.lat,p.lng])).pad(.2));if(iL.length)setTimeout(()=>sdm('⚠️ Некорректные',iL,'Формат: "широта,долгота"'),500);else if(dL.length)setTimeout(()=>sdm('⚠️ Дубликаты',dL,'Уже есть.'),500)}catch(e){UI.toast('Ошибка: '+e.message,'error')}}
+};
+async function exportCSV(){if(!S.points.length){UI.toast('Нет точек','warning');return}const md=document.getElementById('progressModal'),pb=document.getElementById('progressBar'),pt=document.getElementById('progressText'),pd=document.getElementById('progressDetail'),cb=document.getElementById('progressCancelBtn'),ti=document.getElementById('progressTitle');md.classList.add('show');ti.textContent='📋 Экспорт CSV';pt.textContent='Подготовка...';pd.textContent='';cb.style.display='inline-block';cb.textContent='Отмена';let cancelled=false;curOp=()=>{cancelled=true};const cache=ST.gc();const tot=S.points.length;const res=[];const today=new Date().toLocaleDateString('ru-RU');let cached=0,fetched=0,nf=0;const nL=[];for(let i=0;i<tot;i++){if(cancelled){pt.textContent='Отменено';await sl(1500);md.classList.remove('show');curOp=null;return}const p=S.points[i],k=U.ck(p.lat,p.lng),was=!!cache[k];pb.style.width=Math.round(((i+1)/tot)*100)+'%';pt.textContent=`${i+1} из ${tot}`;const addr=await rg(p.lat,p.lng,cache);if(was)cached++;else fetched++;if(!addr.found){nf++;nL.push(`${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`)}pd.textContent=addr.found?`✓ ${addr.city}, ${addr.address} ${was?'(кэш)':''}`:`✗ ${addr.city}`;res.push({city:addr.city,address:addr.address,lat:p.lat.toFixed(6),lng:p.lng.toFixed(6),comment:p.filename||''});if(i<tot-1&&!was)await sl(1000)}pb.style.width='100%';await sl(500);const hdr=['Район','Адрес','Широта','Долгота','Фото','Вид рекламы','Дата','Комментарий'];const rows=[hdr.join(';'),...res.map(r=>[r.city,r.address,r.lat,r.lng,'','','today',r.comment].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';'))];const blob=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='promo_'+Date.now()+'.csv';a.click();pt.textContent='✓ Готово!';pd.textContent=`${tot} точек (кэш: ${cached})`;cb.style.display='none';curOp=null;await sl(1500);md.classList.remove('show');UI.toast(`CSV: ${tot} точек`,'success');if(nL.length)setTimeout(()=>sdm('⚠️ Без адреса',nL,''),500)}
+async function exportAddrTxt(){if(!S.points.length){UI.toast('Нет точек','warning');return}const md=document.getElementById('progressModal'),pb=document.getElementById('progressBar'),pt=document.getElementById('progressText'),pd=document.getElementById('progressDetail'),cb=document.getElementById('progressCancelBtn'),ti=document.getElementById('progressTitle');md.classList.add('show');ti.textContent='📤 Экспорт TXT (адреса)';pt.textContent='Подготовка...';pd.textContent='';cb.style.display='inline-block';cb.textContent='Отмена';let cancelled=false;curOp=()=>{cancelled=true};const cache=ST.gc();const tot=S.points.length;const addrs=[];let cached=0,fetched=0,nf=0;const nL=[];for(let i=0;i<tot;i++){if(cancelled){pt.textContent='Отменено';await sl(1500);md.classList.remove('show');curOp=null;return}const p=S.points[i],k=U.ck(p.lat,p.lng),was=!!cache[k];pb.style.width=Math.round(((i+1)/tot)*100)+'%';pt.textContent=`${i+1} из ${tot}`;const addr=await rg(p.lat,p.lng,cache);if(was)cached++;else fetched++;if(addr.found)addrs.push(`${addr.city}, ${addr.address}`);else{nf++;addrs.push(`Не найден (${p.lat.toFixed(6)}, ${p.lng.toFixed(6)})`);nL.push(`${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`)}pd.textContent=addr.found?`✓ ${addr.city}, ${addr.address}`:`✗ Адрес не найден`;if(i<tot-1&&!was)await sl(1000)}pb.style.width='100%';await sl(500);const blob=new Blob([addrs.join('\n')],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='promo_addr_'+Date.now()+'.txt';a.click();pt.textContent='✓ Готово!';pd.textContent=`${tot} адресов (кэш: ${cached})`;cb.style.display='none';curOp=null;await sl(1500);md.classList.remove('show');UI.toast(`TXT: ${tot} адресов`,'success');if(nL.length)setTimeout(()=>sdm('⚠️ Без адреса',nL,''),500)}
+window.cancelOperation=function(){if(curOp){curOp();document.getElementById('progressCancelBtn').textContent='Отмена...'}};
+const M={
+init(){map=L.map('map',{zoomControl:true}).setView([56.8389,60.6057],13);this.setBM(S.basemap);this._clickHandler=(e)=>{if(S.manual){this.add(e.latlng.lat,e.latlng.lng,null,'manual');UI.toast('Точка добавлена','success')}};map.on('click',this._clickHandler);map.on('zoomend',()=>this.updSize())},
+setBM(k){if(!BM[k])return;if(tile)try{map.removeLayer(tile)}catch(e){}tile=L.tileLayer(BM[k].u,BM[k].o).addTo(map);S.basemap=k;document.querySelectorAll('.basemap-selector button').forEach(b=>b.classList.toggle('active',b.dataset.basemap===k))},
+rad(){const z=map.getZoom(),b=S.ms;return z<=3?b*3:z<=4?b*2.5:z<=5?b*2:z<=7?b*1.5:b},
+add(lat,lng,photo,src='exif',fn='',color=DC){if(U.dup(lat,lng))return false;S.counter++;const p={id:S.counter,lat,lng,photo,source:src,filename:fn,timestamp:new Date().toISOString(),color:color||DC};S.points.push(p);this.mk(p);this.stats();ST.save(this.ser());if(!S.first&&src!=='manual'){S.first=true;setTimeout(()=>{map.setView([lat,lng],16)},500)}return true},
+mk(p){const m=L.circleMarker([p.lat,p.lng],{radius:this.rad(),fillColor:p.color||DC,color:'#fff',weight:2,opacity:1,fillOpacity:.9}).addTo(map);p.marker=m;m.bindPopup(()=>this.popup(p));m.on('click',()=>{if(!S.selMode)m.setPopupContent(this.popup(p))})},
+updSize(){const r=this.rad();S.points.forEach(p=>{if(p.marker)p.marker.setRadius(r)})},
+popup(p){const sl={'exif':'📍 EXIF','filename':'📝 Название','manual':'✋ Вручную','kml':'📥 KML','txt':'📄 TXT','address':'📍 Адрес'};const cls={'exif':'exif','filename':'filename','manual':'manual','kml':'manual','txt':'manual','address':'address'};let h=`<div class="popup-title">Точка #${p.id}</div><div class="popup-coords">${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</div><div class="popup-source ${cls[p.source]||'manual'}">${sl[p.source]||p.source}</div>`;if(p.color&&p.color!==DC){const cn=CP.find(c=>c.hex===p.color)?.name||'';h+=`<div style="display:inline-block;width:12px;height:12px;background:${p.color};border:1px solid #ccc;border-radius:2px;margin-right:4px;vertical-align:middle"></div><span style="font-size:10px;color:#666">${p.color}${cn?' ('+cn+')':''}</span>`}if(p.filename)h+=`<div class="popup-coords">${U.esc(p.filename)}</div>`;if(p.photo)h+=`<img src="${p.photo}" alt="Фото">`;h+=`<button class="delete-btn" onclick="window._del(${p.id})">Удалить</button>`;return h},
+rm(id){const i=S.points.findIndex(p=>p.id===id);if(i>=0){const p=S.points[i];if(p.marker)try{map.removeLayer(p.marker)}catch(e){}S.points.splice(i,1);this.stats();ST.save(this.ser());UI.toast('Удалено','success')}},
+stats(){const t=S.points.length;document.getElementById('totalCount').textContent=t;document.getElementById('fromExifCount').textContent=S.points.filter(p=>p.source==='exif').length;document.getElementById('fromFilenameCount').textContent=S.points.filter(p=>p.source==='filename').length;document.getElementById('fromAddressCount').textContent=S.points.filter(p=>p.source==='address').length;document.getElementById('fromManualCount').textContent=S.points.filter(p=>['manual','kml','txt'].includes(p.source)).length;document.getElementById('noGpsCount').textContent=S.noGps.length},
+ser(){return{version:V,points:S.points.map(p=>({id:p.id,lat:p.lat,lng:p.lng,photo:p.photo,source:p.source,filename:p.filename,timestamp:p.timestamp,color:p.color})),noGps:S.noGps,counter:S.counter,basemap:S.basemap,ms:S.ms}},
+load(d){S.points.forEach(p=>{if(p.marker)try{map.removeLayer(p.marker)}catch(e){}});S.points=[];S.noGps=d.noGps||[];S.counter=d.counter||0;S.basemap=d.basemap||'osm';S.ms=d.ms||8;S.first=false;document.getElementById('sizeSlider').value=S.ms;document.getElementById('sizeValue').textContent=S.ms;d.points.forEach(pd=>{const p={id:pd.id,lat:pd.lat,lng:pd.lng,photo:pd.photo,source:pd.source||'exif',filename:pd.filename||'',timestamp:pd.timestamp,color:pd.color||DC};S.points.push(p);this.mk(p)});this.setBM(S.basemap);this.stats();if(S.points.length){map.fitBounds(L.latLngBounds(S.points.map(p=>[p.lat,p.lng])).pad(.2));S.first=true}},
+clear(){S.points.forEach(p=>{if(p.marker)try{map.removeLayer(p.marker)}catch(e){}});S.points=[];S.noGps=[];S.counter=0;S.first=false;this.stats();ST.save(this.ser());UI.toast('Очищено','success')}
+};
+const SEL={
+init(){this.buildPalette();this.attachEvents()},
+buildPalette(){const panel=document.getElementById('colorPanel');CP.forEach(color=>{const sw=document.createElement('div');sw.className='color-swatch';sw.style.backgroundColor=color.hex;sw.dataset.hex=color.hex;sw.title=color.name;const tt=document.createElement('div');tt.className='swatch-tooltip';tt.textContent=color.name;sw.appendChild(tt);sw.addEventListener('mousedown',e=>e.stopPropagation());sw.addEventListener('pointerdown',e=>e.stopPropagation());sw.addEventListener('click',e=>{e.stopPropagation();this.selectColor(color.hex)});panel.appendChild(sw)});this.updSwatch(CP[0].hex)},
+selectColor(hex){S.actColor=hex;this.updSwatch(hex);if(S.selPts.length>0)this.applyColor(hex)},
+updSwatch(hex){document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('selected',s.dataset.hex===hex))},
+toggleMode(){S.selMode=!S.selMode;const btn=document.getElementById('selectionBtn'),cp=document.getElementById('colorPanel'),ind=document.getElementById('selectionIndicator'),mapEl=document.getElementById('map');if(S.selMode){if(S.manual)window.toggleManualMode();map.off('click',M._clickHandler);btn.classList.add('selection-active');btn.textContent='✕ Выход';cp.classList.add('show');ind.classList.add('show');mapEl.classList.add('selection-mode');map.dragging.disable();map.scrollWheelZoom.disable();map.doubleClickZoom.disable();map.touchZoom.disable();map.boxZoom.disable();map.keyboard.disable();map.closePopup();S.isDraw=false;S.selStart=null;UI.toast('Режим выделения: нарисуйте прямоугольник мышью','info',3000)}else{btn.classList.remove('selection-active');btn.textContent='🎯 Выделить';cp.classList.remove('show');ind.classList.remove('show');mapEl.classList.remove('selection-mode');map.on('click',M._clickHandler);map.dragging.enable();map.scrollWheelZoom.enable();map.doubleClickZoom.enable();map.touchZoom.enable();map.boxZoom.enable();map.keyboard.enable();this.clearSel()}},
+attachEvents(){document.addEventListener('mousedown',e=>{if(!S.selMode)return;if(!map.getContainer().contains(e.target))return;if(e.button!==0)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();this.startDraw(map.mouseEventToLatLng(e))},true);document.addEventListener('mousemove',e=>{if(!S.selMode||!S.isDraw)return;if(!map.getContainer().contains(e.target))return;e.preventDefault();e.stopPropagation();this.updDraw(map.mouseEventToLatLng(e))},true);document.addEventListener('mouseup',e=>{if(!S.selMode||!S.isDraw)return;e.preventDefault();e.stopPropagation();this.finishDraw()},true);window.addEventListener('blur',()=>{if(S.isDraw)this.finishDraw()});document.addEventListener('contextmenu',e=>{if(S.selMode&&map.getContainer().contains(e.target))e.preventDefault()},true)},
+startDraw(ll){this.clearSel(true);S.selStart=ll;S.isDraw=true;if(S.selRect)try{map.removeLayer(S.selRect)}catch(e){}S.selRect=L.rectangle([ll,ll],{color:'#f59e0b',weight:2,fillOpacity:.2,dashArray:'5, 5',interactive:false}).addTo(map)},
+updDraw(ll){if(!S.selRect||!S.selStart)return;S.selRect.setBounds([S.selStart,ll])},
+finishDraw(){if(!S.selRect){S.isDraw=false;return}const bounds=S.selRect.getBounds(),sw=bounds.getSouthWest(),ne=bounds.getNorthEast(),ms=.0001;if(Math.abs(ne.lat-sw.lat)>ms||Math.abs(ne.lng-sw.lng)>ms)this.selectInBounds(bounds);try{map.removeLayer(S.selRect)}catch(e){}S.selRect=null;S.selStart=null;S.isDraw=false},
+selectInBounds(bounds){S.selPts=[];S.points.forEach(point=>{const ll=L.latLng(point.lat,point.lng);if(bounds.contains(ll)){S.selPts.push(point);this.highlight(point,true)}});if(S.selPts.length>0){const cn=CP.find(c=>c.hex===S.actColor)?.name||'';UI.toast(`Выделено точек: ${S.selPts.length}. Цвет: ${cn}.`,'info',3000);this.applyColor(S.actColor)}else UI.toast('В выделенной области нет точек','warning',2000)},
+highlight(point,hl){if(!point.marker)return;point.marker.setStyle({color:'#fff',weight:hl?4:2,opacity:1,fillOpacity:hl?1:.9})},
+applyColor(color){if(!S.selPts.length)return;S.selPts.forEach(point=>{point.color=color;if(point.marker)point.marker.setStyle({fillColor:color,color:'#fff',weight:4,opacity:1,fillOpacity:1})});const cn=CP.find(c=>c.hex===color)?.name||'';UI.toast(`✓ Перекрашено ${S.selPts.length} точек в "${cn}"`,'success',3000);ST.save(M.ser())},
+clearSel(clearState=true){S.selPts.forEach(point=>this.highlight(point,false));if(clearState)S.selPts=[];if(S.selRect){try{map.removeLayer(S.selRect)}catch(e){}S.selRect=null}S.selStart=null;S.isDraw=false}
+};
+window._del=id=>{M.rm(id);map.closePopup()};
+const PM={
+one(file){return new Promise(resolve=>{if(typeof EXIF!=='undefined'){EXIF.getData(file,function(){try{let lat=null,lon=null,lr='N',lnr='E';try{lat=EXIF.getTag(this,'GPSLatitude');lon=EXIF.getTag(this,'GPSLongitude');lr=EXIF.getTag(this,'GPSLatitudeRef')||'N';lnr=EXIF.getTag(this,'GPSLongitudeRef')||'E'}catch(e){}if(lat&&lon&&!U.zeroGps(lat)&&!U.zeroGps(lon)){let a,b,ok=false;if(typeof lat==='number'&&typeof lon==='number'){a=lat;b=lon;if(lr==='S')a=-Math.abs(a);if(lnr==='W')b=-Math.abs(b);ok=true}else if(Array.isArray(lat)&&Array.isArray(lon)){a=U.dms(lat,lr);b=U.dms(lon,lnr);ok=true}if(ok&&isFinite(a)&&isFinite(b)&&a>=-90&&a<=90&&b>=-180&&b<=180){PM.add(file,a,b,'exif',resolve);return}}PM.tryFn(file,resolve)}catch(e){PM.tryFn(file,resolve)}})}else PM.tryFn(file,resolve)})},
+add(file,lat,lng,src,resolve){if(U.dup(lat,lng)){resolve('duplicate');return}const r=new FileReader();r.onload=e=>{M.add(lat,lng,e.target.result,src,file.name);resolve(src)};r.onerror=()=>resolve('noGps');r.readAsDataURL(file)},
+tryFn(file,resolve){const c=U.parseFn(file.name);if(c)PM.add(file,c.lat,c.lng,'filename',resolve);else{S.noGps.push({name:file.name});M.stats();ST.save(M.ser());resolve('noGps')}}
+};
+window.exportKML=function(){if(!S.points.length){UI.toast('Нет точек','info');return}const pl=S.points.map(p=>`<Placemark><name>${U.esc(p.filename||'Точка '+p.id)}</name><Point><coordinates>${p.lng.toFixed(8)},${p.lat.toFixed(8)},0</coordinates></Point></Placemark>`).join('\n');dl(`<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document><name>Промо-карта</name><Folder>\n${pl}\n</Folder></Document></kml>`,'promo_'+Date.now()+'.kml');UI.toast('Одноцветный KML экспортирован','success')};
+window.exportKMLColor=function(){if(!S.points.length){UI.toast('Нет точек','info');return}const pl=S.points.map(p=>{const c=U.h2y(p.color||DC);return`<Placemark><name>${U.esc(p.filename||'Точка '+p.id)}</name><Style><IconStyle><color>${c}</color><Icon><href>https://api-maps.yandex.ru/i/0.4/micro/pmlbs.png</href></Icon><hotSpot x="7" y="28" xunits="pixels" yunits="insetPixels"/></IconStyle></Style><Point><coordinates>${p.lng.toFixed(8)},${p.lat.toFixed(8)},0</coordinates></Point></Placemark>`}).join('\n');dl(`<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document><ExtendedData><Data name="creator"><value><![CDATA[Yandex Map Constructor]]></value></Data></ExtendedData><name><![CDATA[Промо-карта]]></name><Folder>\n${pl}\n</Folder></Document></kml>`,'promo_colors_'+Date.now()+'.kml');UI.toast('Цветной KML экспортирован','success')};
+window.exportTXTCoords=function(){if(!S.points.length){UI.toast('Нет точек','info');return}const blob=new Blob([S.points.map(p=>p.lat.toFixed(6)+','+p.lng.toFixed(6)).join('\n')],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='promo_coords_'+Date.now()+'.txt';a.click();UI.toast('TXT экспортирован','success')};
+function dl(content,fn){const b=new Blob([content],{type:'application/vnd.google-earth.kml+xml'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();URL.revokeObjectURL(a.href)}
+window.exportCSVWithAddresses=exportCSV;
+window.exportTXTAddresses=exportAddrTxt;
+window.searchLocation=function(){const q=document.getElementById('searchInput').value.trim();if(!q)return;const m=q.match(/^(-?\d+\.?\d*)\s*[,;\s]\s*(-?\d+\.?\d*)$/);if(m){const a=parseFloat(m[1]),b=parseFloat(m[2]);if(isFinite(a)&&isFinite(b)){map.setView([a,b],16);UI.toast('Переход','success');return}}fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=1').then(r=>r.json()).then(d=>{if(d.length>0){map.setView([parseFloat(d[0].lat),parseFloat(d[0].lon)],16);UI.toast('Найдено: '+d[0].display_name.split(',')[0],'success')}else UI.toast('Не найдено','error')}).catch(()=>UI.toast('Ошибка поиска','error'))};
+window.toggleManualMode=function(){if(S.selMode)SEL.toggleMode();S.manual=!S.manual;const b=document.getElementById('manualBtn'),c=document.getElementById('cancelManualBtn');if(S.manual){b.classList.add('active');b.textContent='✋ Отмена';c.classList.add('show');UI.toast('Кликните по карте','info')}else{b.classList.remove('active');b.textContent='✋ Вручную';c.classList.remove('show')}};
+window.toggleSelectionMode=function(e){if(e){e.stopPropagation();e.preventDefault()}SEL.toggleMode()};
+window.toggleHelp=function(){document.getElementById('helpModal').classList.toggle('show')};
+window.toggleSidebar=function(){document.getElementById('sidebar').classList.toggle('show');document.getElementById('sidebarOverlay').classList.toggle('show')};
+window.updateMarkerSize=function(v){S.ms=parseInt(v);document.getElementById('sizeValue').textContent=v;M.updSize();ST.save(M.ser())};
+window.setBasemap=function(k){M.setBM(k)};
+window.saveProject=function(){const b=new Blob([JSON.stringify(M.ser(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='promo_'+Date.now()+'.json';a.click();UI.toast('Проект сохранён','success')};
+window.clearAll=function(){if(confirm('Очистить все данные?'))M.clear()};
+const us=document.getElementById('uploadSection'),fi=document.getElementById('fileInput'),ub=document.getElementById('uploadBtn');
+['dragenter','dragover','dragleave','drop'].forEach(e=>{us.addEventListener(e,ev=>{ev.preventDefault();ev.stopPropagation()});document.body.addEventListener(e,ev=>{ev.preventDefault();ev.stopPropagation()})});
+['dragenter','dragover'].forEach(e=>us.addEventListener(e,()=>us.classList.add('drag-over')));
+['dragleave','drop'].forEach(e=>us.addEventListener(e,()=>us.classList.remove('drag-over')));
+us.addEventListener('drop',e=>{if(e.dataTransfer.files.length)BP.photos(e.dataTransfer.files,10)});
+ub.addEventListener('click',e=>{e.stopPropagation();fi.click()});
+fi.addEventListener('change',e=>{if(e.target.files.length)BP.photos(e.target.files,10);e.target.value=''});
+document.getElementById('kmlInput').addEventListener('change',e=>{if(e.target.files[0])BP.kml(e.target.files[0],50,false);e.target.value=''});
+document.getElementById('kmlInputColor').addEventListener('change',e=>{if(e.target.files[0])BP.kml(e.target.files[0],50,true);e.target.value=''});
+document.getElementById('txtInputCoords').addEventListener('change',e=>{if(e.target.files[0])BP.coordTxt(e.target.files[0]);e.target.value=''});
+document.getElementById('txtInputAddresses').addEventListener('change',e=>{if(e.target.files[0])BP.addrTxt(e.target.files[0]);e.target.value=''});
+document.getElementById('projInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{M.load(JSON.parse(r.result));UI.toast('Проект загружен','success')}catch(err){UI.toast('Ошибка: '+err.message,'error')}};r.readAsText(f);e.target.value=''});
+document.getElementById('searchInput').addEventListener('keypress',e=>{if(e.key==='Enter')window.searchLocation()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(S.manual)window.toggleManualMode();if(S.selMode)window.toggleSelectionMode();document.querySelectorAll('.modal.show').forEach(m=>m.classList.remove('show'))}});
+document.addEventListener('click',e=>{const sb=document.getElementById('sidebar');if(window.innerWidth<=768&&sb.classList.contains('show')&&!sb.contains(e.target)&&!e.target.classList.contains('burger-btn'))window.toggleSidebar()});
+M.init();SEL.init();const saved=ST.load();if(saved?.points){M.load(saved);if(saved.points.length)UI.toast('Проект восстановлен','success')}
+})();
+</script>
+</body>
+</html>
