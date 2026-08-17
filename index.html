@@ -61,8 +61,24 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
   padding:5px 10px;cursor:pointer;font-size:12px;
   transition:all 0.2s;white-space:nowrap;
 }
-.header-btn:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.header-btn:hover:not(:disabled){background:var(--brand);color:#fff;border-color:var(--brand)}
 .header-btn.active{background:var(--brand);color:#fff}
+
+/* Undo/Redo кнопки */
+.header-btn.history-btn{
+  padding:5px 8px;
+  font-size:16px;
+  min-width:36px;
+  text-align:center;
+  line-height:1;
+}
+.header-btn.history-btn:disabled{
+  opacity:0.35;
+  cursor:not-allowed;
+  background:var(--panel2);
+  color:var(--muted);
+  border-color:var(--line);
+}
 
 .header-btn.selection-active{
   background:var(--warning);
@@ -549,6 +565,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
   .size-control{display:none}
   .burger-btn{display:block}
   .header-btn:not(.burger-btn){padding:5px 7px;font-size:11px}
+  .header-btn.history-btn{padding:5px 6px;font-size:14px;min-width:30px;}
   .header-btn.help-btn{margin-left:8px;}
   .sidebar{
     position:fixed;left:0;top:56px;bottom:0;width:100%;max-width:320px;
@@ -575,6 +592,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
   header{padding:0 8px;gap:5px}
   header h1{font-size:12px}
   .header-btn{padding:4px 6px;font-size:10px}
+  .header-btn.history-btn{padding:4px 5px;font-size:13px;min-width:28px;}
   .search-box input{padding:6px 30px 6px 8px;font-size:12px}
   .search-box button{padding:3px 7px;font-size:10px}
 }
@@ -595,6 +613,8 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
         <input type="range" id="sizeSlider" min="4" max="16" value="8" oninput="updateMarkerSize(this.value)">
         <span class="size-value" id="sizeValue">8</span>
       </div>
+      <button class="header-btn history-btn" id="undoBtn" onclick="undoAction()" disabled title="Отменить (Ctrl+Z)">↶</button>
+      <button class="header-btn history-btn" id="redoBtn" onclick="redoAction()" disabled title="Повторить (Ctrl+Y)">↷</button>
       <button class="header-btn" id="manualBtn" onclick="toggleManualMode()" title="Ручное добавление точек">✋ Вручную</button>
       <button class="header-btn" id="selectionBtn" onclick="toggleSelectionMode(event)" title="Выделить и перекрасить точки">🎯 Выделить</button>
       <button class="header-btn" id="moveBtn" onclick="toggleMoveMode(event)" title="Переместить точку на карте">🔄 Двигать</button>
@@ -746,11 +766,10 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 <div class="modal" id="helpModal">
   <div class="box">
     <h3>📘 СПРАВКА · Промо-карта</h3>
-    <div class="version">Версия: <b>v.YS2026_06_19_marketing_v18</b></div>
 
     <div class="help-intro">
       <p><strong>Промо-карта</strong> — веб-приложение для контроля расклейки рекламных материалов и формирования отчётности.</p>
-      <p>Автоматически размещает на карте точки по фотографиям с GPS-координатами, адресам или координатам из файлов. Работает в любом браузере без установки.</p>
+      <p>Автоматически размещает на карте точки по фотографиям с GPS-координатами, адресам или координатам из файлов. Работает в любом браузере без установки. Все данные обрабатываются на вашем компьютере локально и не уходят за его пределы.</p>
       <p><strong>Для кого:</strong> маркетологи, бригады расклейки, руководители проектов наружной рекламы.</p>
     </div>
 
@@ -758,12 +777,12 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
     <div class="help-section">
       <ul>
         <li>Контроль факта расклейки по фотоотчёту от бригад</li>
-        <li>Автоматическое формирование отчёта в Excel (CSV)</li>
         <li>Визуализация всех точек на одной карте</li>
         <li>Классификация точек цветом (сделано / не сделано / конкуренты)</li>
-        <li>Корректировка координат точек, снятых с погрешностью</li>
+        <li>Автоматическое формирование отчёта в Excel (CSV)</li>
         <li>Обмен проектами между сотрудниками</li>
         <li>Анализ покрытия и зон без расклейки</li>
+        <li>Импорт/экспорт в удобные форматы</li>
       </ul>
     </div>
 
@@ -773,6 +792,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
       <li>Ручное добавление точек</li>
       <li>Выделение и раскраска групп</li>
       <li>Перемещение точек</li>
+      <li>Отмена/повтор действий</li>
       <li>Импорт цветного KML (Яндекс)</li>
       <li>Экспорт цветного KML (Яндекс)</li>
       <li>Импорт одноцветного KML</li>
@@ -789,32 +809,33 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
     </ul>
 
     <h4>📖 Описание функций</h4>
-    
     <div class="help-section">
       <p><b>📷 Загрузка фото</b> — основной способ добавления точек. Поддерживаются JPG/JPEG, загружаются сотнями файлов за раз с прогресс-баром. Координаты берутся из EXIF или из имени файла (двойная защита).</p>
-      
+
       <p><b>✋ Ручное добавление точек</b> — нажмите кнопку <code>✋ Вручную</code>, затем кликайте по карте в нужных местах. Точка появляется в месте клика. Для выхода — повторное нажатие на кнопку или клавиша <code>ESC</code>.</p>
-      
+
       <p><b>🎯 Выделение и раскраска</b> — нажмите <code>🎯 Выделить</code>, выберите цвет из палитры и нарисуйте прямоугольник мышью вокруг группы точек. Все точки внутри автоматически перекрасятся. Удобно для классификации: 🔴 красный — не сделано, 🟢 зелёный — выполнено, 🔵 синий — конкуренты.</p>
-      
+
       <p><b>🔄 Перемещение точек</b> — если фото сделано с погрешностью (например, с расстояния 5-7 метров от объекта), используйте кнопку <code>🔄 Двигать</code>. Механика: нажмите кнопку → кликните на точку (она подсветится) → переместите курсором на правильное место → кликните ещё раз для фиксации. Координаты обновятся и сохранятся. Карта при этом остаётся неподвижной.</p>
-      
+
+      <p><b>↶↷ Отмена и повтор</b> — кнопки в шапке рядом с «🔄 Двигать» (или <code>Ctrl+Z</code> / <code>Ctrl+Y</code>). История на 20 шагов. Массовые операции (импорт KML/CSV/очистка) отменяются одним действием.</p>
+
       <p><b>🌈 KML Яндекс (цветной)</b> — основной формат обмена с Яндекс Конструктором карт. При импорте сохраняются цвета точек из Яндекса, при экспорте — ваши цвета корректно отображаются в Яндекс Конструкторе.</p>
-      
+
       <p><b>🌐 KML одноцветный</b> — стандартный формат KML без сохранения цветов. Используется для совместимости со старыми файлами и другими системами. Все точки будут одним цветом.</p>
-      
-      <p><b>🔢 TXT координаты</b> — простой список, каждая строка содержит <code>широта,долгота</code> (например: <code>57.33402,61.92401</code>). Подходит для обмена с подрядчиками и геодезистами.</p>
-      
+
+      <p><b>🔢 TXT координаты</b> — простой список, каждая строка содержит <code>широта,долгота</code> (например: <code>57.33402,61.92401</code>). Универсальный формат для переноса в другие сервисы.</p>
+
       <p><b>📍 TXT адреса</b> — список адресов, по одному на строку. При импорте адреса автоматически геокодируются в координаты (≈1 сек на адрес). При экспорте — наоборот, координаты преобразуются в адреса.</p>
-      
+
       <p><b>📋 CSV (главный отчёт)</b> — итоговый файл для Excel с колонками: Район, Адрес, Широта, Долгота, Фото, Вид рекламы, Дата, Комментарий. Адреса определяются автоматически. В ячейках «Фото» и «Вид рекламы» стоят подсказки («вставьте ссылку на фото или папку», «выберите вид рекламы в табличке») — просто замените их своими данными. Первый раз ≈1 сек на точку, повторно — мгновенно (используется кэш).</p>
-      
+
       <p><b>💾 Проект (JSON)</b> — полное сохранение всех данных: точки, фото, настройки, цвета. Используется для передачи проекта между сотрудниками или как резервная копия.</p>
-      
+
       <p><b>🔍 Поиск</b> — поле поиска принимает название города, улицу или координаты. Нажмите <code>Enter</code> — карта переместится в найденное место.</p>
-      
+
       <p><b>🗺 Подложки карт</b> — 4 варианта: 2GIS (по умолчанию), Google схема / спутник / гибрид. Переключаются в правом верхнем углу карты.</p>
-      
+
       <p><b>🔧 Размер точек</b> — ползунок в шапке меняет размер маркеров. Автоматически увеличивается при уменьшении масштаба карты.</p>
     </div>
 
@@ -825,23 +846,19 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
         <li>✅ <b>Координаты на фото</b> (Водяной знак) — координаты пропечатываются прямо на снимке</li>
         <li>✅ <b>Координаты в имени файла</b> — название файла становится вида <code>57.33402,61.92401_фото.jpg</code></li>
       </ul>
-      <p><b>Почему это важно:</b> это двойная защита. Если GPS-метаданные (EXIF) потеряются при передаче через мессенджер — координаты автоматически возьмутся из имени файла. Без этой настройки потеря GPS = потеря точки.</p>
+      <p><b>Почему это важно:</b> это тройная защита. Сервис читает координаты из метаданных фото (EXIF); если их нет — из имени файла; а если нет и там — координаты всегда можно переписать с водяного знака вручную (как — в разделе ниже).</p>
     </div>
 
     <h4>⚠️ Как передавать фото без потери GPS</h4>
     <div class="help-section">
-      <p><b>🥇 Надёжные способы</b> (EXIF гарантированно сохраняется):</p>
+      <p><b>🥇 Надёжные способы</b> (GPS сохраняется гарантированно):</p>
       <ul>
-        <li>Облачные хранилища: Яндекс.Диск, Google Диск, Dropbox</li>
+        <li>Облако: Яндекс.Диск, Google Диск, Dropbox</li>
         <li>Прямая передача: USB-кабель, AirDrop, Bluetooth</li>
-        <li>Email: отправляйте фото как вложения</li>
+        <li>Email — фото как вложение</li>
       </ul>
-      <p><b>🥈 Через мессенджеры</b> — только как файлы, НЕ как фото из галереи:</p>
-      <ul>
-        <li><b>Telegram:</b> 📎 → Файл (НЕ Галерея!)</li>
-        <li><b>WhatsApp:</b> 📎 → Документ</li>
-      </ul>
-      <p>При отправке фото из галереи мессенджеры удаляют EXIF и сжимают качество — координаты будут потеряны.</p>
+      <p><b>🥈 Мессенджеры</b> (Telegram, МАКС) — отправляйте фото только как файл: 📎 → «Файл», а не «Галерея». Иначе мессенджер сожмёт снимок, удалит координаты и поменяет название файла — сервису будет неоткуда их взять.</p>
+      <p><b>🔧 Если координаты всё же потерялись:</b> посмотрите их на водяном знаке фото, переименуйте файл в формате <code>57.33402,61.92401_фото.jpg</code> и загрузите снова — сервис распознает координаты из названия.</p>
     </div>
 
     <h4>📊 Источники точек (видно в статистике)</h4>
@@ -857,20 +874,29 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 
     <h4>🎯 Типовые сценарии использования</h4>
     <div class="help-section">
-      <p><b>🕵️ Анализ конкурентов.</b> Загрузите KML конкурентов из Яндекс Конструктора — увидите где они работают и где есть свободные зоны.</p>
-      <p><b>📊 Сверка с базой.</b> Выгрузите из 1С/Excel адреса → импорт TXT → карта → экспорт CSV обратно → сверка.</p>
-      <p><b>🔧 Восстановление битых фото.</b> Если фото потеряли GPS — переименуйте в <code>57.33402,61.92401_фото.jpg</code> и загрузите заново.</p>
-      <p><b>📍 Корректировка координат.</b> Если бригадир снимал с 5-7 метров — используйте <code>🔄 Двигать</code>, чтобы точно поставить точку на объекте.</p>
-      <p><b>⚡ Быстрая повторная выгрузка.</b> Адреса кэшируются — вторая выгрузка CSV тех же точек происходит мгновенно.</p>
-      <p><b>📸 Массовая загрузка.</b> 500+ фото за раз обрабатываются порциями с прогресс-баром, без зависаний.</p>
+      <p><b>🕵️ Анализ конкурентов.</b> Сфотографируйте рекламу конкурента, загрузите и разметьте своим цветом, затем добавьте свои точки — сразу видно, кто где работает и где свободные зоны.</p>
+      <p><b>📊 Сверка с базой.</b> Адреса из Excel → импорт TXT → карта → экспорт CSV обратно → сверка.</p>
+      <p><b>📍 Корректировка координат.</b> Фото снято с 5-7 метров — «🔄 Двигать» ставит точку точно на объект.</p>
+      <p><b>🤝 Передача коллегам.</b> Сохраните JSON-проект и отправьте файл — все точки, фото и цвета на месте.</p>
+      <p><b>📈 Отчёт руководству.</b> Экспортируйте цветной KML и откройте в Яндекс Конструкторе — вся расклейка на карте без установки программ.</p>
+      <p><b>⚡ Быстрая повторная выгрузка.</b> Адреса кэшируются — повторный CSV тех же точек формируется мгновенно.</p>
     </div>
 
     <h4>🔧 Горячие клавиши</h4>
     <div class="help-section">
       <ul>
+        <li><b>Ctrl+Z</b> — отменить последнее действие</li>
+        <li><b>Ctrl+Y</b> или <b>Ctrl+Shift+Z</b> — повторить отменённое</li>
         <li><b>ESC</b> — выйти из ручного режима / режима выделения / режима перемещения / закрыть окно</li>
         <li><b>Enter</b> в поле поиска — найти адрес или координаты</li>
       </ul>
+    </div>
+
+    <div class="version">
+      Версия: <b>v.YS2026_06_19_marketing_v20</b><br>
+      Разработчик: <b>Сергей Ямов</b><br>
+      Связь: Telegram <b>@witcher_S_Y</b><br>
+      © 2026, все права защищены
     </div>
 
     <div class="actions">
@@ -911,10 +937,9 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 (function PROMO_APP() {
 'use strict';
 
-const APP_VERSION = 'v.YS2026_06_19_marketing_v18';
-const AUTOSAVE_KEY = 'promo_autosave_v29';
-// Список старых ключей автосохранения — чтобы точки не потерялись при обновлении
-const LEGACY_AUTOSAVE_KEYS = ['promo_autosave_v28','promo_autosave_v27','promo_autosave_v26','promo_autosave_v25','promo_autosave_v24','promo_autosave_v23','promo_autosave_v22','promo_autosave_v21','promo_autosave_v20','promo_autosave_v19','promo_autosave_v18','promo_autosave_v17','promo_autosave_v16'];
+const APP_VERSION = 'v.YS2026_06_19_marketing_v20';
+const AUTOSAVE_KEY = 'promo_autosave_v30';
+const LEGACY_AUTOSAVE_KEYS = ['promo_autosave_v29','promo_autosave_v28','promo_autosave_v27','promo_autosave_v26','promo_autosave_v25','promo_autosave_v24','promo_autosave_v23','promo_autosave_v22','promo_autosave_v21','promo_autosave_v20','promo_autosave_v19','promo_autosave_v18','promo_autosave_v17','promo_autosave_v16'];
 const ADDRESS_CACHE_KEY = 'promo_address_cache_v1';
 
 const COLOR_PALETTE = [
@@ -988,7 +1013,6 @@ const Utils = {
   cacheKey(lat, lng) {
     return lat.toFixed(5) + ',' + lng.toFixed(5);
   },
-  // Конвертация aBGR (Яндекс KML) в #RRGGBB
   yandexColorToHex(color) {
     if (!color || color.length !== 8) return DEFAULT_COLOR;
     const bb = color.substring(2, 4);
@@ -996,7 +1020,6 @@ const Utils = {
     const rr = color.substring(6, 8);
     return '#' + rr + gg + bb;
   },
-  // Конвертация #RRGGBB в aBGR (Яндекс KML)
   hexToYandexColor(hex) {
     if (!hex || hex.length !== 7) return 'ff5e1fd6';
     const rr = hex.substring(1, 3);
@@ -1039,7 +1062,6 @@ const Storage = {
   save(project) {
     try { localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(project)); } catch(e){}
   },
-  // Ищет данные в новом ключе, затем во всех старых — точки не теряются при обновлении
   load() {
     try {
       const s = localStorage.getItem(AUTOSAVE_KEY);
@@ -1083,10 +1105,6 @@ const state = {
   isMoving: false
 };
 
-// ============================================
-// ПОДЛОЖКИ КАРТ (ВАРИАНТ А: без OSM и без Яндекса)
-// 2GIS (по умолчанию) + Google схема/спутник/гибрид
-// ============================================
 const BASEMAPS = {
   '2gis': { layers: [{ url: 'https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}', opts: {maxZoom:18} }] },
   'google': { layers: [{ url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', opts: {maxZoom:21} }] },
@@ -1098,6 +1116,179 @@ let map, currentTiles = [];
 let currentOperation = null;
 
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+// ============================================
+// ИСТОРИЯ ДЕЙСТВИЙ (UNDO/REDO)
+// ============================================
+const HistoryManager = {
+  history: [],
+  index: -1,
+  maxSize: 20,
+  isUndoRedo: false,
+  batchMode: false,
+  batchOperations: [],
+  batchLabel: '',
+  
+  push(op) {
+    if (this.isUndoRedo) return;
+    
+    if (this.batchMode) {
+      this.batchOperations.push(op);
+      return;
+    }
+    
+    if (this.index < this.history.length - 1) {
+      this.history = this.history.slice(0, this.index + 1);
+    }
+    
+    this.history.push(op);
+    
+    if (this.history.length > this.maxSize) {
+      this.history.shift();
+    } else {
+      this.index++;
+    }
+    
+    this.updateButtons();
+  },
+  
+  beginBatch(label) {
+    this.batchMode = true;
+    this.batchOperations = [];
+    this.batchLabel = label || 'Массовая операция';
+  },
+  
+  endBatch() {
+    this.batchMode = false;
+    if (this.batchOperations.length > 0) {
+      this.push({
+        type: 'batch',
+        label: this.batchLabel,
+        count: this.batchOperations.length,
+        operations: [...this.batchOperations]
+      });
+    }
+    this.batchOperations = [];
+  },
+  
+  undo() {
+    if (this.index < 0) return;
+    
+    const op = this.history[this.index];
+    this.isUndoRedo = true;
+    
+    try {
+      this._reverseOperation(op);
+    } finally {
+      this.isUndoRedo = false;
+    }
+    
+    this.index--;
+    this.updateButtons();
+    MapModule.updateStats();
+    Storage.save(MapModule.serializeProject());
+    UI.toast('↶ Отменено: ' + this._describe(op), 'info', 1500);
+  },
+  
+  redo() {
+    if (this.index >= this.history.length - 1) return;
+    
+    this.index++;
+    const op = this.history[this.index];
+    this.isUndoRedo = true;
+    
+    try {
+      this._applyOperation(op);
+    } finally {
+      this.isUndoRedo = false;
+    }
+    
+    this.updateButtons();
+    MapModule.updateStats();
+    Storage.save(MapModule.serializeProject());
+    UI.toast('↷ Повторено: ' + this._describe(op), 'info', 1500);
+  },
+  
+  _reverseOperation(op) {
+    switch(op.type) {
+      case 'add':
+        MapModule.removePointInternal(op.point.id);
+        break;
+      case 'delete':
+        MapModule.restorePoint(op.point);
+        break;
+      case 'move':
+        MapModule.movePointInternal(op.id, op.oldLat, op.oldLng);
+        break;
+      case 'color':
+        MapModule.setColorInternal(op.id, op.oldColor);
+        break;
+      case 'multiColor':
+        op.changes.forEach(c => MapModule.setColorInternal(c.id, c.oldColor));
+        break;
+      case 'batch':
+        for (let i = op.operations.length - 1; i >= 0; i--) {
+          this._reverseOperation(op.operations[i]);
+        }
+        break;
+      case 'clear':
+        op.points.forEach(p => MapModule.restorePoint(p));
+        break;
+    }
+  },
+  
+  _applyOperation(op) {
+    switch(op.type) {
+      case 'add':
+        MapModule.restorePoint(op.point);
+        break;
+      case 'delete':
+        MapModule.removePointInternal(op.point.id);
+        break;
+      case 'move':
+        MapModule.movePointInternal(op.id, op.newLat, op.newLng);
+        break;
+      case 'color':
+        MapModule.setColorInternal(op.id, op.newColor);
+        break;
+      case 'multiColor':
+        op.changes.forEach(c => MapModule.setColorInternal(c.id, c.newColor));
+        break;
+      case 'batch':
+        op.operations.forEach(o => this._applyOperation(o));
+        break;
+      case 'clear':
+        MapModule.clearAllInternal();
+        break;
+    }
+  },
+  
+  _describe(op) {
+    switch(op.type) {
+      case 'add': return 'добавление точки';
+      case 'delete': return 'удаление точки';
+      case 'move': return 'перемещение точки';
+      case 'color': return 'изменение цвета';
+      case 'multiColor': return `перекраска ${op.changes.length} точек`;
+      case 'batch': return `${op.label} (${op.count})`;
+      case 'clear': return 'очистка карты';
+      default: return 'действие';
+    }
+  },
+  
+  updateButtons() {
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+    if (undoBtn) undoBtn.disabled = this.index < 0;
+    if (redoBtn) redoBtn.disabled = this.index >= this.history.length - 1;
+  },
+  
+  clear() {
+    this.history = [];
+    this.index = -1;
+    this.updateButtons();
+  }
+};
 
 async function reverseGeocode(lat, lng, cache) {
   const key = Utils.cacheKey(lat, lng);
@@ -1207,6 +1398,8 @@ const BatchProcessor = {
     currentOperation = () => { cancelled = true; };
     const total = arr.length;
     
+    HistoryManager.beginBatch('Загрузка фото');
+    
     for (let i = 0; i < total; i += batchSize) {
       if (cancelled) {
         progressText.textContent = 'Отменено пользователем';
@@ -1214,6 +1407,7 @@ const BatchProcessor = {
         await sleep(1500);
         modal.classList.remove('show');
         currentOperation = null;
+        HistoryManager.endBatch();
         return;
       }
       
@@ -1240,6 +1434,8 @@ const BatchProcessor = {
       progressDetail.textContent = `EXIF: ${fromExif} | Из названия: ${fromFilename} | Без GPS: ${noGps} | Дубликатов: ${duplicates}`;
       await sleep(100);
     }
+    
+    HistoryManager.endBatch();
     
     progressText.textContent = '✓ Завершено!';
     progressDetail.textContent = `Загружено ${total} фото. EXIF: ${fromExif}, Название: ${fromFilename}, Без GPS: ${noGps}, Дубликатов: ${duplicates}`;
@@ -1352,6 +1548,8 @@ const BatchProcessor = {
       const duplicateList = [];
       const total = points.length;
       
+      HistoryManager.beginBatch(withColors ? 'Импорт цветного KML' : 'Импорт KML');
+      
       for (let i = 0; i < total; i += batchSize) {
         if (cancelled) {
           progressText.textContent = 'Отменено пользователем';
@@ -1359,6 +1557,7 @@ const BatchProcessor = {
           await sleep(1500);
           modal.classList.remove('show');
           currentOperation = null;
+          HistoryManager.endBatch();
           return;
         }
         
@@ -1377,6 +1576,8 @@ const BatchProcessor = {
         progressDetail.textContent = `Добавлено: ${added} | Пропущено (дубликаты): ${skipped}`;
         await sleep(50);
       }
+      
+      HistoryManager.endBatch();
       
       progressText.textContent = '✓ Завершено!';
       progressDetail.textContent = `Импортировано ${added} точек`;
@@ -1406,6 +1607,7 @@ const BatchProcessor = {
     } catch(err) {
       modal.classList.remove('show');
       currentOperation = null;
+      HistoryManager.endBatch();
       UI.toast('Ошибка импорта: ' + err.message, 'error');
     }
   },
@@ -1446,6 +1648,8 @@ const BatchProcessor = {
       const duplicateList = [];
       const total = addresses.length;
       
+      HistoryManager.beginBatch('Импорт адресов');
+      
       for (let i = 0; i < total; i++) {
         if (cancelled) {
           progressText.textContent = 'Отменено пользователем';
@@ -1453,6 +1657,7 @@ const BatchProcessor = {
           await sleep(1500);
           modal.classList.remove('show');
           currentOperation = null;
+          HistoryManager.endBatch();
           return;
         }
         
@@ -1482,6 +1687,8 @@ const BatchProcessor = {
         
         await sleep(1000);
       }
+      
+      HistoryManager.endBatch();
       
       progressText.textContent = '✓ Завершено!';
       progressDetail.textContent = `Добавлено: ${added} | Не найдено: ${notFound} | Дубликатов: ${duplicates}`;
@@ -1521,6 +1728,7 @@ const BatchProcessor = {
     } catch(err) {
       modal.classList.remove('show');
       currentOperation = null;
+      HistoryManager.endBatch();
       UI.toast('Ошибка импорта: ' + err.message, 'error');
     }
   },
@@ -1532,6 +1740,8 @@ const BatchProcessor = {
       let added = 0, skipped = 0, invalid = 0;
       const duplicateList = [];
       const invalidList = [];
+      
+      HistoryManager.beginBatch('Импорт координат TXT');
       
       lines.forEach((line, idx) => {
         const parts = line.split(/[,;\s]+/);
@@ -1552,6 +1762,8 @@ const BatchProcessor = {
           invalidList.push(`Строка ${idx + 1}: ${line}`);
         }
       });
+      
+      HistoryManager.endBatch();
       
       if (added === 0 && invalid === 0) {
         UI.toast('В файле не найдено координат', 'error');
@@ -1586,6 +1798,7 @@ const BatchProcessor = {
         }, 500);
       }
     } catch(err) {
+      HistoryManager.endBatch();
       UI.toast('Ошибка: ' + err.message, 'error');
     }
   }
@@ -1652,7 +1865,6 @@ async function exportCSVWithAddresses() {
       ? `✓ ${addr.city}, ${addr.address} ${wasCached ? '(из кэша)' : ''}`
       : `✗ ${addr.city} — ${addr.address}`;
     
-    // ВАЖНО: подсказки в ячейках Фото и Вид рекламы (как в ранних версиях)
     results.push({
       id: i + 1,
       city: addr.city,
@@ -1833,7 +2045,6 @@ window.cancelOperation = function() {
 
 const MapModule = {
   init() {
-    // attributionControl: false — убираем надписи в правом нижнем углу
     map = L.map('map', {zoomControl:true, attributionControl:false}).setView([56.8389, 60.6057], 13);
     this.setBasemap(state.basemap);
     
@@ -1849,7 +2060,6 @@ const MapModule = {
   },
   
   setBasemap(key) {
-    // Защита от старых сохранённых значений (osm, yandex и т.п.)
     if (!BASEMAPS[key]) key = '2gis';
     const bm = BASEMAPS[key];
     
@@ -1898,6 +2108,12 @@ const MapModule = {
     this.createMarker(point);
     this.updateStats();
     Storage.save(this.serializeProject());
+    
+    HistoryManager.push({
+      type: 'add',
+      point: this._serializePoint(point)
+    });
+    
     if (!state.firstPointAdded && source !== 'manual') {
       state.firstPointAdded = true;
       setTimeout(() => {
@@ -1906,6 +2122,79 @@ const MapModule = {
       }, 500);
     }
     return true;
+  },
+  
+  // Внутренний метод для undo/redo — без логирования
+  restorePoint(serializedPoint) {
+    // Проверяем, нет ли уже такой точки
+    if (state.points.some(p => p.id === serializedPoint.id)) return;
+    
+    const point = {
+      id: serializedPoint.id,
+      lat: serializedPoint.lat,
+      lng: serializedPoint.lng,
+      photo: serializedPoint.photo,
+      source: serializedPoint.source,
+      filename: serializedPoint.filename,
+      timestamp: serializedPoint.timestamp,
+      color: serializedPoint.color || DEFAULT_COLOR
+    };
+    state.points.push(point);
+    this.createMarker(point);
+  },
+  
+  // Внутренний метод для undo/redo — удаление без логирования
+  removePointInternal(id) {
+    const idx = state.points.findIndex(p => p.id === id);
+    if (idx >= 0) {
+      const point = state.points[idx];
+      if (point.marker) { try { map.removeLayer(point.marker); } catch(e){} }
+      state.points.splice(idx, 1);
+    }
+  },
+  
+  // Внутренний метод для undo/redo — перемещение без логирования
+  movePointInternal(id, lat, lng) {
+    const point = state.points.find(p => p.id === id);
+    if (point) {
+      point.lat = lat;
+      point.lng = lng;
+      if (point.marker) {
+        point.marker.setLatLng([lat, lng]);
+        point.marker.setPopupContent(this.createPopupContent(point));
+      }
+    }
+  },
+  
+  // Внутренний метод для undo/redo — смена цвета без логирования
+  setColorInternal(id, color) {
+    const point = state.points.find(p => p.id === id);
+    if (point) {
+      point.color = color;
+      if (point.marker) {
+        point.marker.setStyle({
+          fillColor: color,
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.9
+        });
+        point.marker.setPopupContent(this.createPopupContent(point));
+      }
+    }
+  },
+  
+  _serializePoint(point) {
+    return {
+      id: point.id,
+      lat: point.lat,
+      lng: point.lng,
+      photo: point.photo,
+      source: point.source,
+      filename: point.filename,
+      timestamp: point.timestamp,
+      color: point.color
+    };
   },
   
   createMarker(point) {
@@ -1926,7 +2215,6 @@ const MapModule = {
       }
     });
     
-    // Обработчик для режима "Двигать"
     marker.on('mousedown', (e) => {
       if (state.moveMode) {
         e.originalEvent.preventDefault();
@@ -1976,8 +2264,16 @@ const MapModule = {
     const idx = state.points.findIndex(p => p.id === id);
     if (idx >= 0) {
       const point = state.points[idx];
+      const serialized = this._serializePoint(point);
+      
       if (point.marker) { try { map.removeLayer(point.marker); } catch(e){} }
       state.points.splice(idx, 1);
+      
+      HistoryManager.push({
+        type: 'delete',
+        point: serialized
+      });
+      
       this.updateStats();
       Storage.save(this.serializeProject());
       UI.toast('Точка удалена', 'success');
@@ -2051,6 +2347,10 @@ const MapModule = {
     });
     this.setBasemap(state.basemap);
     this.updateStats();
+    
+    // При загрузке проекта очищаем историю
+    HistoryManager.clear();
+    
     if (state.points.length > 0) {
       const bounds = L.latLngBounds(state.points.map(p => [p.lat, p.lng]));
       map.fitBounds(bounds.pad(0.2));
@@ -2059,6 +2359,24 @@ const MapModule = {
   },
   
   clearAll() {
+    if (state.points.length === 0) {
+      UI.toast('Нечего очищать', 'info');
+      return;
+    }
+    
+    // Логируем все точки перед очисткой
+    const allPoints = state.points.map(p => this._serializePoint(p));
+    
+    HistoryManager.push({
+      type: 'clear',
+      points: allPoints
+    });
+    
+    this.clearAllInternal();
+    UI.toast('Все данные очищены', 'success');
+  },
+  
+  clearAllInternal() {
     state.points.forEach(p => {
       if (p.marker) {
         try { map.removeLayer(p.marker); } catch(e){}
@@ -2070,7 +2388,6 @@ const MapModule = {
     state.firstPointAdded = false;
     this.updateStats();
     Storage.save(this.serializeProject());
-    UI.toast('Все данные очищены', 'success');
   }
 };
 
@@ -2305,6 +2622,12 @@ const SelectionModule = {
   applyColorToSelected(color) {
     if (state.selectedPoints.length === 0) return;
     
+    const changes = state.selectedPoints.map(point => ({
+      id: point.id,
+      oldColor: point.color,
+      newColor: color
+    }));
+    
     state.selectedPoints.forEach(point => {
       point.color = color;
       if (point.marker) {
@@ -2316,6 +2639,11 @@ const SelectionModule = {
           fillOpacity: 1
         });
       }
+    });
+    
+    HistoryManager.push({
+      type: 'multiColor',
+      changes: changes
     });
     
     const colorName = COLOR_PALETTE.find(c => c.hex === color)?.name || '';
@@ -2407,6 +2735,10 @@ const MoveModule = {
     state.movingPoint = point;
     state.isMoving = true;
     
+    // Сохраняем старые координаты для истории
+    this._oldLat = point.lat;
+    this._oldLng = point.lng;
+    
     if (point.marker) {
       point.marker.setStyle({
         color: '#000000',
@@ -2434,6 +2766,18 @@ const MoveModule = {
     
     if (marker) {
       const newLatLng = marker.getLatLng();
+      const oldLat = this._oldLat;
+      const oldLng = this._oldLng;
+      
+      // Логируем ДО обновления координат
+      HistoryManager.push({
+        type: 'move',
+        id: point.id,
+        oldLat: oldLat,
+        oldLng: oldLng,
+        newLat: newLatLng.lat,
+        newLng: newLatLng.lng
+      });
       
       point.lat = newLatLng.lat;
       point.lng = newLatLng.lng;
@@ -2462,7 +2806,7 @@ const MoveModule = {
     
     const point = state.movingPoint;
     if (point.marker) {
-      point.marker.setLatLng([point.lat, point.lng]);
+      point.marker.setLatLng([this._oldLat, this._oldLng]);
       point.marker.setStyle({
         color: '#ffffff',
         weight: 2,
@@ -2662,6 +3006,10 @@ window.PROMO_APP = {
   deletePoint: (id) => { MapModule.removePoint(id); map.closePopup(); }
 };
 
+// Глобальные функции Undo/Redo
+window.undoAction = function() { HistoryManager.undo(); };
+window.redoAction = function() { HistoryManager.redo(); };
+
 window.searchLocation = function() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) return;
@@ -2828,6 +3176,19 @@ document.getElementById('searchInput').addEventListener('keypress', e => {
 });
 
 document.addEventListener('keydown', e => {
+  // Undo: Ctrl+Z
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+    e.preventDefault();
+    HistoryManager.undo();
+    return;
+  }
+  // Redo: Ctrl+Y или Ctrl+Shift+Z
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+    e.preventDefault();
+    HistoryManager.redo();
+    return;
+  }
+  
   if (e.key === 'Escape') {
     if (state.manualMode) window.toggleManualMode();
     if (state.selectionMode) window.toggleSelectionMode();
@@ -2864,6 +3225,7 @@ if (saved && saved.points) {
   MapModule.loadProject(saved);
   if (saved.points.length) UI.toast('Проект восстановлен', 'success');
 }
+HistoryManager.updateButtons();
 
 })();
 </script>
