@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="author" content="Сергей Ямов">
 <title>Промо-карта · Отчет по расклейке</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
@@ -64,7 +65,6 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 .header-btn:hover:not(:disabled){background:var(--brand);color:#fff;border-color:var(--brand)}
 .header-btn.active{background:var(--brand);color:#fff}
 
-/* Undo/Redo кнопки */
 .header-btn.history-btn{
   padding:5px 8px;
   font-size:16px;
@@ -810,7 +810,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 
     <h4>📖 Описание функций</h4>
     <div class="help-section">
-      <p><b>📷 Загрузка фото</b> — основной способ добавления точек. Поддерживаются JPG/JPEG, загружаются сотнями файлов за раз с прогресс-баром. Координаты берутся из EXIF или из имени файла (двойная защита).</p>
+      <p><b>📷 Загрузка фото</b> — основной способ добавления точек. Поддерживаются JPG/JPEG, загружаются сотнями файлов за раз с прогресс-баром. Координаты берутся из EXIF или из имени файла (тройная защита). Парсер понимает любые разделители: пробел, «_», «,», «-», «;», «:» и их смеси, а также буквы направлений (С/Ю/N/S, В/З/E/W) и градусы DMS.</p>
 
       <p><b>✋ Ручное добавление точек</b> — нажмите кнопку <code>✋ Вручную</code>, затем кликайте по карте в нужных местах. Точка появляется в месте клика. Для выхода — повторное нажатие на кнопку или клавиша <code>ESC</code>.</p>
 
@@ -828,7 +828,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 
       <p><b>📍 TXT адреса</b> — список адресов, по одному на строку. При импорте адреса автоматически геокодируются в координаты (≈1 сек на адрес). При экспорте — наоборот, координаты преобразуются в адреса.</p>
 
-      <p><b>📋 CSV (главный отчёт)</b> — итоговый файл для Excel с колонками: Район, Адрес, Широта, Долгота, Фото, Вид рекламы, Дата, Комментарий. Адреса определяются автоматически. В ячейках «Фото» и «Вид рекламы» стоят подсказки («вставьте ссылку на фото или папку», «выберите вид рекламы в табличке») — просто замените их своими данными. Первый раз ≈1 сек на точку, повторно — мгновенно (используется кэш).</p>
+      <p><b>📋 CSV (главный отчёт)</b> — итоговый файл для Excel с колонками: Район, Адрес, Широта, Долгота, Фото, Вид рекламы, Дата, Комментарий. Адреса определяются автоматически. В ячейках «Фото» и «Вид рекламы» стоят подсказки — просто замените их своими данными. Первый раз ≈1 сек на точку, повторно — мгновенно (используется кэш).</p>
 
       <p><b>💾 Проект (JSON)</b> — полное сохранение всех данных: точки, фото, настройки, цвета. Используется для передачи проекта между сотрудниками или как резервная копия.</p>
 
@@ -846,18 +846,19 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
         <li>✅ <b>Координаты на фото</b> (Водяной знак) — координаты пропечатываются прямо на снимке</li>
         <li>✅ <b>Координаты в имени файла</b> — название файла становится вида <code>57.33402,61.92401_фото.jpg</code></li>
       </ul>
-      <p><b>Почему это важно:</b> это тройная защита. Сервис читает координаты из метаданных фото (EXIF); если их нет — из имени файла; а если нет и там — координаты всегда можно переписать с водяного знака вручную (как — в разделе ниже).</p>
+      <p><b>Почему это важно:</b> это тройная защита. Сервис читает координаты из метаданных фото (EXIF); если их нет — из имени файла (причём понимает любые разделители: пробел, «_», «,», «-», «;», «:» и их смеси, а также буквы направлений С/Ю/N/S, В/З/E/W и градусы DMS); а если нет и там — координаты всегда можно переписать с водяного знака вручную.</p>
     </div>
 
     <h4>⚠️ Как передавать фото без потери GPS</h4>
     <div class="help-section">
+      <p><b>Главное правило:</b> отправляйте фото как <b>ФАЙЛ</b>, а не как картинку из галереи.</p>
       <p><b>🥇 Надёжные способы</b> (GPS сохраняется гарантированно):</p>
       <ul>
         <li>Облако: Яндекс.Диск, Google Диск, Dropbox</li>
         <li>Прямая передача: USB-кабель, AirDrop, Bluetooth</li>
         <li>Email — фото как вложение</li>
       </ul>
-      <p><b>🥈 Мессенджеры</b> (Telegram, МАКС) — отправляйте фото только как файл: 📎 → «Файл», а не «Галерея». Иначе мессенджер сожмёт снимок, удалит координаты и поменяет название файла — сервису будет неоткуда их взять.</p>
+      <p><b>🥈 Мессенджеры</b> (Telegram, МАКС) — отправляйте фото только как файл: 📎 → «Файл», а не «Галерея».</p>
       <p><b>🔧 Если координаты всё же потерялись:</b> посмотрите их на водяном знаке фото, переименуйте файл в формате <code>57.33402,61.92401_фото.jpg</code> и загрузите снова — сервис распознает координаты из названия.</p>
     </div>
 
@@ -893,7 +894,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
     </div>
 
     <div class="version">
-      Версия: <b>v.YS2026_06_19_marketing_v20</b><br>
+      Версия: <b>YS2026_08_18_v21</b><br>
       Разработчик: <b>Сергей Ямов</b><br>
       Связь: Telegram <b>@witcher_S_Y</b><br>
       © 2026, все права защищены
@@ -937,9 +938,9 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 (function PROMO_APP() {
 'use strict';
 
-const APP_VERSION = 'v.YS2026_06_19_marketing_v20';
-const AUTOSAVE_KEY = 'promo_autosave_v30';
-const LEGACY_AUTOSAVE_KEYS = ['promo_autosave_v29','promo_autosave_v28','promo_autosave_v27','promo_autosave_v26','promo_autosave_v25','promo_autosave_v24','promo_autosave_v23','promo_autosave_v22','promo_autosave_v21','promo_autosave_v20','promo_autosave_v19','promo_autosave_v18','promo_autosave_v17','promo_autosave_v16'];
+const APP_VERSION = 'YS2026_08_18_v21';
+const AUTOSAVE_KEY = 'promo_autosave_v31';
+const LEGACY_AUTOSAVE_KEYS = ['promo_autosave_v30','promo_autosave_v29','promo_autosave_v28','promo_autosave_v27','promo_autosave_v26','promo_autosave_v25','promo_autosave_v24','promo_autosave_v23','promo_autosave_v22','promo_autosave_v21','promo_autosave_v20','promo_autosave_v19','promo_autosave_v18','promo_autosave_v17','promo_autosave_v16'];
 const ADDRESS_CACHE_KEY = 'promo_address_cache_v1';
 
 const COLOR_PALETTE = [
@@ -977,22 +978,53 @@ const Utils = {
     const d = toNum(dms[0]) + toNum(dms[1])/60 + toNum(dms[2])/3600;
     return (ref === 'S' || ref === 'W') ? -d : d;
   },
+  _num(s) { return parseFloat(String(s).replace(',', '.')); },
+  _ref(r) {
+    return ({'N':'N','C':'N','С':'N','S':'S','Ю':'S','E':'E','В':'E','W':'W','З':'W'})[(r || '').toUpperCase()] || null;
+  },
+  _validLL(lat, lng) {
+    if (!isFinite(lat) || !isFinite(lng)) return false;
+    if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return false;
+    if (Math.abs(lat) < 0.0001 && Math.abs(lng) < 0.0001) return false;
+    return true;
+  },
   parseCoordsFromFilename(filename) {
     if (!filename) return null;
-    const name = filename.replace(/\.[^/.]+$/, '');
-    const p1 = /(\d{2}\.\d{4,6})\s*[°]?\s*[СCсcNn]\s+(\d{2}\.\d{4,6})\s*[°]?\s*[ЕEеeвВ]/;
-    const m1 = name.match(p1);
-    if (m1) {
-      const lat = parseFloat(m1[1]), lng = parseFloat(m1[2]);
-      if (isFinite(lat) && isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)
-        return { lat, lng };
+    let name = String(filename).replace(/\.[^/.]+$/, '');
+    name = name.replace(/\d{4}[/.-]\d{2}[/.-]\d{2}/g, ' ').replace(/\d{2}[/.-]\d{2}[/.-]\d{4}/g, ' ').replace(/\d{1,2}:\d{2}(:\d{2})?/g, ' ');
+    name = name.replace(/(\d{1,3}),(\d{3,9})(?!\d)/g, '$1.$2');
+    name = name.replace(/(\d)[\s_,;:\-\\/|]+(?=\d)/g, '$1 ');
+    const N = '(-?\\d{1,3}(?:[.,]\\d{2,9})?)';
+    let m;
+    m = name.match(new RegExp("(\\d{1,2})[°º]\\s*(\\d{1,2})['′ʹ]\\s*(\\d{1,2}(?:[.,]\\d+)?)[\"″”\"]?\\s*([NSНСЮ])?\\s+(\\d{1,3})[°º]\\s*(\\d{1,2})['′ʹ]\\s*(\\d{1,2}(?:[.,]\\d+)?)[\"″”\"]?\\s*([EWВЕЗ])?", "i"));
+    if (m) {
+      const lat = this.dmsToDec([+m[1], +m[2], this._num(m[3])], this._ref(m[4]) || 'N');
+      const lng = this.dmsToDec([+m[5], +m[6], this._num(m[7])], this._ref(m[8]) || 'E');
+      if (this._validLL(lat, lng)) return { lat, lng };
     }
-    const p2 = /(\d{2}\.\d{4,6})\s*[,;]\s*(\d{2}\.\d{4,6})/;
-    const m2 = name.match(p2);
-    if (m2) {
-      const lat = parseFloat(m2[1]), lng = parseFloat(m2[2]);
-      if (isFinite(lat) && isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)
-        return { lat, lng };
+    m = name.match(new RegExp("([NSНСЮ])?\\s*" + N + "\\s*[°º]?\\s*([NSНСЮ])?\\s*([EWВЕЗ])?\\s*" + N + "\\s*[°º]?\\s*([EWВЕЗ])?", "i"));
+    if (m) {
+      let lat = this._num(m[2]), lng = this._num(m[5]);
+      const lr = this._ref(m[1]) || this._ref(m[3]);
+      const rr = this._ref(m[4]) || this._ref(m[6]);
+      if (lr === 'S') lat = -Math.abs(lat);
+      if (rr === 'W') lng = -Math.abs(lng);
+      if (this._validLL(lat, lng)) return { lat, lng };
+      if (!lr && !rr && this._validLL(lng, lat)) return { lat: lng, lng: lat };
+    }
+    m = name.match(new RegExp('(?:lat|шир)[^\\d-]*' + N + '[^\\d-]*(?:lon|lng|long|долг)[^\\d-]*' + N, 'i'));
+    if (m) {
+      const lat = this._num(m[1]), lng = this._num(m[2]);
+      if (this._validLL(lat, lng)) return { lat, lng };
+    }
+    const tokens = [];
+    const re = /-?\d{1,3}[.,]\d{2,9}/g;
+    let t;
+    while ((t = re.exec(name)) !== null) tokens.push(this._num(t[0]));
+    for (let i = 0; i + 1 < tokens.length; i++) {
+      const a = tokens[i], b = tokens[i + 1];
+      if (this._validLL(a, b)) return { lat: a, lng: b };
+      if (this._validLL(b, a)) return { lat: b, lng: a };
     }
     return null;
   },
@@ -1117,9 +1149,6 @@ let currentOperation = null;
 
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-// ============================================
-// ИСТОРИЯ ДЕЙСТВИЙ (UNDO/REDO)
-// ============================================
 const HistoryManager = {
   history: [],
   index: -1,
@@ -2124,9 +2153,7 @@ const MapModule = {
     return true;
   },
   
-  // Внутренний метод для undo/redo — без логирования
   restorePoint(serializedPoint) {
-    // Проверяем, нет ли уже такой точки
     if (state.points.some(p => p.id === serializedPoint.id)) return;
     
     const point = {
@@ -2143,7 +2170,6 @@ const MapModule = {
     this.createMarker(point);
   },
   
-  // Внутренний метод для undo/redo — удаление без логирования
   removePointInternal(id) {
     const idx = state.points.findIndex(p => p.id === id);
     if (idx >= 0) {
@@ -2153,7 +2179,6 @@ const MapModule = {
     }
   },
   
-  // Внутренний метод для undo/redo — перемещение без логирования
   movePointInternal(id, lat, lng) {
     const point = state.points.find(p => p.id === id);
     if (point) {
@@ -2166,7 +2191,6 @@ const MapModule = {
     }
   },
   
-  // Внутренний метод для undo/redo — смена цвета без логирования
   setColorInternal(id, color) {
     const point = state.points.find(p => p.id === id);
     if (point) {
@@ -2348,7 +2372,6 @@ const MapModule = {
     this.setBasemap(state.basemap);
     this.updateStats();
     
-    // При загрузке проекта очищаем историю
     HistoryManager.clear();
     
     if (state.points.length > 0) {
@@ -2364,7 +2387,6 @@ const MapModule = {
       return;
     }
     
-    // Логируем все точки перед очисткой
     const allPoints = state.points.map(p => this._serializePoint(p));
     
     HistoryManager.push({
@@ -2735,7 +2757,6 @@ const MoveModule = {
     state.movingPoint = point;
     state.isMoving = true;
     
-    // Сохраняем старые координаты для истории
     this._oldLat = point.lat;
     this._oldLng = point.lng;
     
@@ -2769,7 +2790,6 @@ const MoveModule = {
       const oldLat = this._oldLat;
       const oldLng = this._oldLng;
       
-      // Логируем ДО обновления координат
       HistoryManager.push({
         type: 'move',
         id: point.id,
@@ -3006,7 +3026,6 @@ window.PROMO_APP = {
   deletePoint: (id) => { MapModule.removePoint(id); map.closePopup(); }
 };
 
-// Глобальные функции Undo/Redo
 window.undoAction = function() { HistoryManager.undo(); };
 window.redoAction = function() { HistoryManager.redo(); };
 
@@ -3176,14 +3195,15 @@ document.getElementById('searchInput').addEventListener('keypress', e => {
 });
 
 document.addEventListener('keydown', e => {
-  // Undo: Ctrl+Z
-  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+  const tag = e.target && e.target.tagName;
+  const typing = tag === 'INPUT' || tag === 'TEXTAREA';
+
+  if (!typing && (e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
     e.preventDefault();
     HistoryManager.undo();
     return;
   }
-  // Redo: Ctrl+Y или Ctrl+Shift+Z
-  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+  if (!typing && (e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
     e.preventDefault();
     HistoryManager.redo();
     return;
