@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{
-  --brand:#d61f5e;
-  --brand-light:#ff6b9d;
-  --brand-dark:#a01545;
+  --brand:#1e98ff;
+  --brand-light:#82cdff;
+  --brand-dark:#177bc9;
   --bg:#f5f5f7;
   --panel:#ffffff;
   --panel2:#fafafa;
@@ -101,7 +101,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 
 .header-btn.help-btn{
   margin-left:12px;
-  background:#fff0f5;
+  background:#eaf5ff;
   color:var(--brand);
   border:1px dashed var(--brand);
   font-weight:600;
@@ -111,51 +111,6 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
   color:#fff;
   border-style:solid;
 }
-
-.color-panel{
-  display:none;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:5px;
-  gap:4px;
-  align-items:center;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
-}
-.color-panel.show{display:flex;}
-.color-swatch{
-  width:26px;height:26px;
-  border-radius:4px;
-  border:2px solid transparent;
-  cursor:pointer;
-  transition:all 0.2s;
-  position:relative;
-}
-.color-swatch:hover{
-  transform:scale(1.15);
-  border-color:var(--text);
-  z-index:1;
-}
-.color-swatch.selected{
-  border-color:var(--text);
-  box-shadow:0 0 0 2px var(--brand);
-  transform:scale(1.1);
-}
-.color-swatch .swatch-tooltip{
-  display:none;
-  position:absolute;
-  bottom:calc(100% + 6px);
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--text);
-  color:#fff;
-  padding:3px 6px;
-  border-radius:3px;
-  font-size:10px;
-  white-space:nowrap;
-  pointer-events:none;
-}
-.color-swatch:hover .swatch-tooltip{display:block;}
 
 .size-control{
   display:flex;align-items:center;gap:4px;
@@ -195,11 +150,11 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 .upload-section{
   margin-bottom:12px;padding:14px;
   border:2px dashed var(--brand);border-radius:12px;
-  background:#fff0f5;cursor:pointer;
+  background:#e3f2fd;cursor:pointer;
   transition:all 0.2s;
 }
-.upload-section:hover{background:#ffe0ec}
-.upload-section.drag-over{border-color:var(--brand-dark);background:#ffe0ec}
+.upload-section:hover{background:#bbdefb}
+.upload-section.drag-over{border-color:var(--brand-dark);background:#bbdefb}
 
 .upload-btn{
   width:100%;padding:12px;background:var(--brand);color:#fff;
@@ -401,6 +356,37 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 }
 .move-indicator.show{display:block}
 
+.filter-indicator{
+  position:absolute;
+  top:10px;
+  right:10px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  color:var(--text);
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  z-index:900;
+  display:none;
+  animation:fadeIn 0.3s ease;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.2s;
+  gap:8px;
+  align-items:center;
+}
+.filter-indicator.show{display:flex}
+.filter-indicator:hover{background:var(--panel2)}
+.filter-indicator .color-dot{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--line);flex-shrink:0;
+}
+.filter-indicator .clear-x{
+  color:var(--danger);font-weight:700;font-size:14px;line-height:1;margin-left:4px;
+}
+
 @keyframes fadeIn{from{opacity:0;transform:translate(-50%, -10px)}to{opacity:1;transform:translate(-50%, 0)}}
 
 .tooltip{
@@ -479,7 +465,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 
 .help-intro{
   padding:10px 12px;
-  background:linear-gradient(135deg, #fff0f5 0%, #ffe0ec 100%);
+  background:linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
   border-radius:8px;
   margin-bottom:10px;
   border-left:3px solid var(--brand);
@@ -559,6 +545,33 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 }
 .sidebar-overlay.show{display:block}
 
+/* ===== ФИЛЬТР-БАР ===== */
+.filter-bar{
+  display:flex;align-items:center;gap:6px;
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:20px;padding:4px 10px;margin-left:12px;
+  flex-shrink:0;
+}
+.filter-label{
+  font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;
+}
+.filter-btn{
+  width:22px;height:22px;border-radius:50%;
+  border:2px solid transparent;cursor:pointer;
+  transition:all 0.2s;flex-shrink:0;
+}
+.filter-btn:hover{transform:scale(1.3);border-color:var(--text);z-index:10}
+.filter-btn.active{
+  border-color:var(--brand);
+  box-shadow:0 0 0 2px rgba(30,152,255,0.3);
+}
+.filter-btn.all{
+  background:linear-gradient(45deg,#ed4543,#1bad03,#1e98ff);
+  width:auto;padding:0 12px;border-radius:12px;
+  color:#fff;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+
 @media (max-width:768px){
   header h1{font-size:13px}
   .search-box{max-width:none}
@@ -567,6 +580,13 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
   .header-btn:not(.burger-btn){padding:5px 7px;font-size:11px}
   .header-btn.history-btn{padding:5px 6px;font-size:14px;min-width:30px;}
   .header-btn.help-btn{margin-left:8px;}
+  .filter-bar{
+    position:fixed;top:56px;left:0;right:0;
+    margin:0;border-radius:0;border-left:0;border-right:0;
+    padding:6px 12px;z-index:999;
+    flex-wrap:wrap;
+  }
+  #workspace{margin-top:38px;}
   .sidebar{
     position:fixed;left:0;top:56px;bottom:0;width:100%;max-width:320px;
     transform:translateX(-100%);transition:transform 0.3s;z-index:800;
@@ -577,14 +597,11 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
   #toastContainer{right:8px;bottom:8px;left:8px}
   .toast{max-width:none}
   .cancel-manual-btn{bottom:80px;padding:10px 20px;font-size:13px}
-  .color-panel{
-    position:fixed;top:64px;right:8px;z-index:1001;
-    flex-wrap:wrap;max-width:280px;
-  }
   .selection-indicator, .move-indicator{
     top:60px;font-size:11px;padding:6px 12px;
     max-width:90%;white-space:normal;
   }
+  .filter-indicator{top:60px;right:8px;font-size:10px;padding:5px 10px}
   .help-functions-list{columns:1;}
 }
 
@@ -607,19 +624,19 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
       <input type="text" id="searchInput" placeholder="🔍 Город или координаты">
       <button onclick="searchLocation()">Найти</button>
     </div>
+    <div class="filter-bar" id="filterBar"></div>
     <div class="header-actions">
       <div class="size-control">
         <label>Точки:</label>
         <input type="range" id="sizeSlider" min="4" max="16" value="8" oninput="updateMarkerSize(this.value)">
         <span class="size-value" id="sizeValue">8</span>
       </div>
-      <button class="header-btn history-btn" id="undoBtn" onclick="undoAction()" disabled title="Отменить (Ctrl+Z)">↶</button>
+      <button class="header-btn history-btn" id="undoBtn" onclick="undoAction()" disabled title="Отменить (Ctrl+Z)"></button>
       <button class="header-btn history-btn" id="redoBtn" onclick="redoAction()" disabled title="Повторить (Ctrl+Y)">↷</button>
-      <button class="header-btn" id="manualBtn" onclick="toggleManualMode()" title="Ручное добавление точек">✋ Вручную</button>
+      <button class="header-btn" id="manualBtn" onclick="toggleManualMode()" title="Ручное добавление точек"> Вручную</button>
       <button class="header-btn" id="selectionBtn" onclick="toggleSelectionMode(event)" title="Выделить и перекрасить точки">🎯 Выделить</button>
       <button class="header-btn" id="moveBtn" onclick="toggleMoveMode(event)" title="Переместить точку на карте">🔄 Двигать</button>
-      <div class="color-panel" id="colorPanel"></div>
-      <button class="header-btn help-btn" onclick="toggleHelp()" title="Справка">❓ Справка</button>
+      <button class="header-btn help-btn" onclick="toggleHelp()" title="Справка"> Справка</button>
     </div>
   </header>
 
@@ -646,7 +663,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
           <span class="stat-value success" id="fromExifCount">0</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">📝 Название:</span>
+          <span class="stat-label"> Название:</span>
           <span class="stat-value warning" id="fromFilenameCount">0</span>
         </div>
         <div class="stat-row">
@@ -656,6 +673,10 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
         <div class="stat-row">
           <span class="stat-label">✋ Вручную:</span>
           <span class="stat-value purple" id="fromManualCount">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label"> KML/TXT:</span>
+          <span class="stat-value" id="fromImportCount">0</span>
         </div>
         <div class="stat-row">
           <span class="stat-label">❌ Без GPS:</span>
@@ -670,8 +691,12 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
           <span class="info-icon">ⓘ</span>
         </button>
         <input type="file" id="kmlInputColor" accept=".kml,.kmz" hidden>
-        <button class="kml-btn" onclick="exportKMLColor()" onmouseenter="showTooltip(event, 'Экспорт точек в цветной KML для Яндекс Конструктора карт. Все цвета точек сохраняются и корректно отображаются в Яндексе.')" onmouseleave="hideTooltip()">
+        <button class="kml-btn" onclick="exportKMLColor()" onmouseenter="showTooltip(event, 'Экспорт точек в цветной KML для Яндекс Конструктора карт. Все цвета точек сохраняются и корректно отображаются в Яндексе. Уважает текущий фильтр.')" onmouseleave="hideTooltip()">
           <span>Экспорт цветной KML</span>
+          <span class="info-icon"></span>
+        </button>
+        <button class="kml-btn" onclick="exportKMLNoNames()" onmouseenter="showTooltip(event, 'Экспорт цветного KML БЕЗ названий точек. Точки отображаются без подписей — чистая карта. Уважает текущий фильтр.')" onmouseleave="hideTooltip()">
+          <span>Экспорт цветной KML (без названий)</span>
           <span class="info-icon">ⓘ</span>
         </button>
       </div>
@@ -701,20 +726,20 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
         </div>
 
         <div class="group-box export">
-          <div class="group-title">📤 ЭКСПОРТ</div>
-          <button class="group-btn" onclick="exportKML()" onmouseenter="showTooltip(event, 'Экспорт одноцветного KML (все точки одним цветом). Подходит для других картографических систем, не поддерживающих цвета Яндекс KML.')" onmouseleave="hideTooltip()">
+          <div class="group-title">📤 ЭКСПОРТ (уважает фильтр)</div>
+          <button class="group-btn" onclick="exportKML()" onmouseenter="showTooltip(event, 'Экспорт одноцветного KML (все точки одним цветом). Подходит для других картографических систем. Уважает текущий фильтр.')" onmouseleave="hideTooltip()">
             <span>Экспорт одноцветного KML</span>
             <span class="info-icon">ⓘ</span>
           </button>
-          <button class="group-btn" onclick="exportTXTCoords()" onmouseenter="showTooltip(event, 'Экспорт координат в TXT файл. Формат: широта,долгота. Подходит для импорта в другие системы или передачи геодезистам.')" onmouseleave="hideTooltip()">
+          <button class="group-btn" onclick="exportTXTCoords()" onmouseenter="showTooltip(event, 'Экспорт координат в TXT файл. Формат: широта,долгота. Уважает текущий фильтр.')" onmouseleave="hideTooltip()">
             <span>Экспорт координат TXT</span>
             <span class="info-icon">ⓘ</span>
           </button>
-          <button class="group-btn" onclick="exportTXTAddresses()" onmouseenter="showTooltip(event, 'Экспорт адресов в TXT файл. Каждый адрес на новой строке. Автоматически определяется по координатам.')" onmouseleave="hideTooltip()">
+          <button class="group-btn" onclick="exportTXTAddresses()" onmouseenter="showTooltip(event, 'Экспорт адресов в TXT файл. Уважает текущий фильтр.')" onmouseleave="hideTooltip()">
             <span>Экспорт адреса TXT</span>
             <span class="info-icon">ⓘ</span>
           </button>
-          <button class="group-btn csv-btn" onclick="exportCSVWithAddresses()" onmouseenter="showTooltip(event, 'Экспорт в CSV с адресами и координатами. Формат для Excel с разделителем ;. Колонки: Район, Адрес, Широта, Долгота, Фото, Вид рекламы, Дата, Комментарий. В ячейках Фото и Вид рекламы — подсказки для заполнения.')" onmouseleave="hideTooltip()">
+          <button class="group-btn csv-btn" onclick="exportCSVWithAddresses()" onmouseenter="showTooltip(event, 'Экспорт в CSV с адресами и координатами. Формат для Excel с разделителем ;. Уважает текущий фильтр.')" onmouseleave="hideTooltip()">
             <span>Экспорт CSV (адрес+коор.)</span>
             <span class="info-icon">ⓘ</span>
           </button>
@@ -722,11 +747,11 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 
         <div class="group-box project">
           <div class="group-title">💾 ПРОЕКТ</div>
-          <button class="group-btn" onclick="saveProject()" onmouseenter="showTooltip(event, 'Сохранить весь проект в JSON файл. Сохраняются все точки, фото, настройки, цвета. Можно передать коллегам или использовать как резервную копию.')" onmouseleave="hideTooltip()">
+          <button class="group-btn" onclick="saveProject()" onmouseenter="showTooltip(event, 'Сохранить весь проект в JSON файл. Сохраняются все точки, фото, настройки, цвета, фильтр.')" onmouseleave="hideTooltip()">
             <span>Сохранить проект</span>
-            <span class="info-icon">ⓘ</span>
+            <span class="info-icon"></span>
           </button>
-          <button class="group-btn" onclick="document.getElementById('projInput').click()" onmouseenter="showTooltip(event, 'Открыть ранее сохраненный проект из JSON файла. Все текущие данные будут заменены данными из файла.')" onmouseleave="hideTooltip()">
+          <button class="group-btn" onclick="document.getElementById('projInput').click()" onmouseenter="showTooltip(event, 'Открыть ранее сохраненный проект из JSON файла. Все текущие данные будут заменены.')" onmouseleave="hideTooltip()">
             <span>Открыть проект</span>
             <span class="info-icon">ⓘ</span>
           </button>
@@ -740,18 +765,24 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
     <div id="map"></div>
     
     <div class="selection-indicator" id="selectionIndicator">
-      🎯 Режим выделения · Нарисуйте прямоугольник мышью на карте
+      🎯 Режим выделения · зум кнопками +/− · рисуйте прямоугольник
     </div>
     
     <div class="move-indicator" id="moveIndicator">
       🔄 Режим перемещения · Кликните на точку, затем переместите мышью и кликните для фиксации
     </div>
 
+    <div class="filter-indicator" id="filterIndicator" onclick="resetFilter()" title="Сбросить фильтр">
+      <span class="color-dot" id="filterIndicatorDot"></span>
+      <span id="filterIndicatorText">Фильтр</span>
+      <span class="clear-x">✕</span>
+    </div>
+
     <div class="basemap-selector">
-      <button data-basemap="2gis" class="active" onclick="setBasemap('2gis')">2GIS</button>
-      <button data-basemap="google" onclick="setBasemap('google')">Google схема</button>
+      <button data-basemap="google" class="active" onclick="setBasemap('google')">Google схема</button>
       <button data-basemap="google_sat" onclick="setBasemap('google_sat')">Google спутник</button>
       <button data-basemap="google_hybrid" onclick="setBasemap('google_hybrid')">Google гибрид</button>
+      <button data-basemap="2gis" onclick="setBasemap('2gis')">2GIS (может не работать)</button>
     </div>
 
     <button class="cancel-manual-btn" id="cancelManualBtn" onclick="toggleManualMode()">
@@ -778,10 +809,10 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
       <ul>
         <li>Контроль факта расклейки по фотоотчёту от бригад</li>
         <li>Визуализация всех точек на одной карте</li>
-        <li>Классификация точек цветом (сделано / не сделано / конкуренты)</li>
+        <li>Классификация точек цветом (палитра Яндекса — 16 цветов)</li>
+        <li>Фильтрация точек по цветам</li>
         <li>Автоматическое формирование отчёта в Excel (CSV)</li>
         <li>Обмен проектами между сотрудниками</li>
-        <li>Анализ покрытия и зон без расклейки</li>
         <li>Импорт/экспорт в удобные форматы</li>
       </ul>
     </div>
@@ -791,10 +822,12 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
       <li>Загрузка фото с GPS</li>
       <li>Ручное добавление точек</li>
       <li>Выделение и раскраска групп</li>
+      <li>Фильтрация по цветам</li>
       <li>Перемещение точек</li>
       <li>Отмена/повтор действий</li>
       <li>Импорт цветного KML (Яндекс)</li>
-      <li>Экспорт цветного KML (Яндекс)</li>
+      <li>Экспорт цветной KML (Яндекс)</li>
+      <li>Экспорт KML без названий</li>
       <li>Импорт одноцветного KML</li>
       <li>Экспорт одноцветного KML</li>
       <li>Импорт TXT (координаты)</li>
@@ -810,17 +843,23 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 
     <h4>📖 Описание функций</h4>
     <div class="help-section">
-      <p><b>📷 Загрузка фото</b> — основной способ добавления точек. Поддерживаются JPG/JPEG, загружаются сотнями файлов за раз с прогресс-баром. Координаты берутся из EXIF или из имени файла (тройная защита). Парсер понимает любые разделители: пробел, «_», «,», «-», «;», «:» и их смеси, а также буквы направлений (С/Ю/N/S, В/З/E/W) и градусы DMS.</p>
+      <p><b> Палитра Яндекса</b> — 16 цветов один в один как в Яндекс Конструкторе карт. Дефолтный цвет новых точек — голубой (#1e98ff), как в Яндексе по умолчанию. Палитра расположена в шапке слева от кнопок управления.</p>
 
-      <p><b>✋ Ручное добавление точек</b> — нажмите кнопку <code>✋ Вручную</code>, затем кликайте по карте в нужных местах. Точка появляется в месте клика. Для выхода — повторное нажатие на кнопку или клавиша <code>ESC</code>.</p>
+      <p><b>🔍 Фильтр по цветам</b> — клик по цветному кружку в палитре (в обычном режиме) оставляет на карте только точки этого цвета, остальные скрываются. Клик по «ВСЕ» или на индикатор фильтра справа вверху карты — сбросить фильтр. <b>Все экспорты уважают фильтр</b> — в файл попадут только видимые точки, в тосте пишется «фильтр: N из M».</p>
 
-      <p><b>🎯 Выделение и раскраска</b> — нажмите <code>🎯 Выделить</code>, выберите цвет из палитры и нарисуйте прямоугольник мышью вокруг группы точек. Все точки внутри автоматически перекрасятся. Удобно для классификации: 🔴 красный — не сделано, 🟢 зелёный — выполнено, 🔵 синий — конкуренты.</p>
+      <p><b>🎯 Выделение и раскраска</b> — нажмите <code>🎯 Выделить</code>, нарисуйте прямоугольник мышью вокруг группы точек. Затем кликните по нужному цвету в той же палитре слева — выделенные точки перекрасятся. В режиме выделения фильтр заморожен, палитра работает только на перекраску. Подсказка: зум в режиме выделения — кнопками +/− в углу карты.</p>
+
+      <p><b> Загрузка фото</b> — основной способ добавления точек. Поддерживаются JPG/JPEG, загружаются сотнями файлов за раз с прогресс-баром. Координаты берутся из EXIF или из имени файла (тройная защита). Парсер понимает любые разделители: пробел, «_», «,», «-», «;», «:» и их смеси, а также буквы направлений (С/Ю/N/S, В/З/E/W) и градусы DMS.</p>
+
+      <p><b> Ручное добавление точек</b> — нажмите кнопку <code>✋ Вручную</code>, затем кликайте по карте в нужных местах. Точка появляется в месте клика. Для выхода — повторное нажатие на кнопку или клавиша <code>ESC</code>.</p>
 
       <p><b>🔄 Перемещение точек</b> — если фото сделано с погрешностью (например, с расстояния 5-7 метров от объекта), используйте кнопку <code>🔄 Двигать</code>. Механика: нажмите кнопку → кликните на точку (она подсветится) → переместите курсором на правильное место → кликните ещё раз для фиксации. Координаты обновятся и сохранятся. Карта при этом остаётся неподвижной.</p>
 
-      <p><b>↶↷ Отмена и повтор</b> — кнопки в шапке рядом с «🔄 Двигать» (или <code>Ctrl+Z</code> / <code>Ctrl+Y</code>). История на 20 шагов. Массовые операции (импорт KML/CSV/очистка) отменяются одним действием.</p>
+      <p><b>↶↷ Отмена и повтор</b> — кнопки в шапке (или <code>Ctrl+Z</code> / <code>Ctrl+Y</code>). История на 20 шагов. Массовые операции (импорт KML/CSV/очистка) отменяются одним действием.</p>
 
-      <p><b>🌈 KML Яндекс (цветной)</b> — основной формат обмена с Яндекс Конструктором карт. При импорте сохраняются цвета точек из Яндекса, при экспорте — ваши цвета корректно отображаются в Яндекс Конструкторе.</p>
+      <p><b>🌈 Импорт цветной KML</b> — основной формат обмена с Яндекс Конструктором карт. При импорте сохраняются цвета точек из Яндекса, при экспорте — ваши цвета корректно отображаются в Яндекс Конструкторе.</p>
+
+      <p><b>📤 Экспорт цветной KML (без названий)</b> — цветной KML без подписей у точек. Идеально для «чистой» карты в Яндекс Конструкторе, когда подписи мешают восприятию.</p>
 
       <p><b>🌐 KML одноцветный</b> — стандартный формат KML без сохранения цветов. Используется для совместимости со старыми файлами и другими системами. Все точки будут одним цветом.</p>
 
@@ -830,13 +869,13 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 
       <p><b>📋 CSV (главный отчёт)</b> — итоговый файл для Excel с колонками: Район, Адрес, Широта, Долгота, Фото, Вид рекламы, Дата, Комментарий. Адреса определяются автоматически. В ячейках «Фото» и «Вид рекламы» стоят подсказки — просто замените их своими данными. Первый раз ≈1 сек на точку, повторно — мгновенно (используется кэш).</p>
 
-      <p><b>💾 Проект (JSON)</b> — полное сохранение всех данных: точки, фото, настройки, цвета. Используется для передачи проекта между сотрудниками или как резервная копия.</p>
+      <p><b> Проект (JSON)</b> — полное сохранение всех данных: точки, фото, настройки, цвета, активный фильтр. Используется для передачи проекта между сотрудниками или как резервная копия.</p>
 
       <p><b>🔍 Поиск</b> — поле поиска принимает название города, улицу или координаты. Нажмите <code>Enter</code> — карта переместится в найденное место.</p>
 
-      <p><b>🗺 Подложки карт</b> — 4 варианта: 2GIS (по умолчанию), Google схема / спутник / гибрид. Переключаются в правом верхнем углу карты.</p>
+      <p><b>🗺 Подложки карт</b> — 4 варианта: Google схема / спутник / гибрид + 2GIS (может не работать без API-ключа). Переключаются в правом верхнем углу карты.</p>
 
-      <p><b>🔧 Размер точек</b> — ползунок в шапке меняет размер маркеров. Автоматически увеличивается при уменьшении масштаба карты.</p>
+      <p><b> Размер точек</b> — ползунок в шапке меняет размер маркеров. Автоматически увеличивается при уменьшении масштаба карты.</p>
     </div>
 
     <h4 class="color-title">📱 Как правильно фотографировать</h4>
@@ -868,12 +907,13 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
         <li><b style="color:var(--success)">✅ EXIF</b> — координаты из метаданных фото (самый надёжный)</li>
         <li><b style="color:var(--warning)">📝 Название</b> — восстановленные из имени файла</li>
         <li><b style="color:var(--info)">📍 Адреса</b> — из импорта TXT-адресов</li>
-        <li><b style="color:var(--purple)">✋ Вручную</b> — клик по карте, KML/TXT импорт</li>
-        <li><b style="color:var(--danger)">❌ Без GPS</b> — фото без координат (не отображаются)</li>
+        <li><b style="color:var(--purple)">✋ Вручную</b> — клик по карте</li>
+        <li><b>📥 KML/TXT</b> — импорт из файлов KML или TXT координат</li>
+        <li><b style="color:var(--danger)"> Без GPS</b> — фото без координат (не отображаются)</li>
       </ul>
     </div>
 
-    <h4>🎯 Типовые сценарии использования</h4>
+    <h4> Типовые сценарии использования</h4>
     <div class="help-section">
       <p><b>🕵️ Анализ конкурентов.</b> Сфотографируйте рекламу конкурента, загрузите и разметьте своим цветом, затем добавьте свои точки — сразу видно, кто где работает и где свободные зоны.</p>
       <p><b>📊 Сверка с базой.</b> Адреса из Excel → импорт TXT → карта → экспорт CSV обратно → сверка.</p>
@@ -894,7 +934,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
     </div>
 
     <div class="version">
-      Версия: <b>YS2026_08_18_v21</b><br>
+      Версия: <b>YS2026_09_15_v24</b><br>
       Разработчик: <b>Сергей Ямов</b><br>
       Связь: Telegram <b>@witcher_S_Y</b><br>
       © 2026, все права защищены
@@ -908,7 +948,7 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 
 <div class="modal progress-modal" id="progressModal">
   <div class="box">
-    <h3 id="progressTitle">🗺 Обработка</h3>
+    <h3 id="progressTitle"> Обработка</h3>
     <div class="progress-text" id="progressText">Подготовка...</div>
     <div class="progress-bar-container">
       <div class="progress-bar" id="progressBar" style="width:0%"></div>
@@ -938,25 +978,32 @@ header h1{font-size:15px;color:var(--brand);font-weight:700;white-space:nowrap}
 (function PROMO_APP() {
 'use strict';
 
-const APP_VERSION = 'YS2026_08_18_v21';
-const AUTOSAVE_KEY = 'promo_autosave_v31';
-const LEGACY_AUTOSAVE_KEYS = ['promo_autosave_v30','promo_autosave_v29','promo_autosave_v28','promo_autosave_v27','promo_autosave_v26','promo_autosave_v25','promo_autosave_v24','promo_autosave_v23','promo_autosave_v22','promo_autosave_v21','promo_autosave_v20','promo_autosave_v19','promo_autosave_v18','promo_autosave_v17','promo_autosave_v16'];
+const APP_VERSION = 'YS2026_09_15_v24';
+const AUTOSAVE_KEY = 'promo_autosave_v34';
+const LEGACY_AUTOSAVE_KEYS = ['promo_autosave_v33','promo_autosave_v32','promo_autosave_v31','promo_autosave_v30','promo_autosave_v29','promo_autosave_v28','promo_autosave_v27','promo_autosave_v26','promo_autosave_v25','promo_autosave_v24','promo_autosave_v23','promo_autosave_v22','promo_autosave_v21','promo_autosave_v20','promo_autosave_v19','promo_autosave_v18','promo_autosave_v17','promo_autosave_v16'];
 const ADDRESS_CACHE_KEY = 'promo_address_cache_v1';
 
+// ===== ПАЛИТРА ЯНДЕКСА (16 цветов, точная копия) =====
 const COLOR_PALETTE = [
-  { hex: '#ed4543', name: 'Красный' },
-  { hex: '#ff931e', name: 'Оранжевый' },
+  { hex: '#82cdff', name: 'Светло-голубой' },
+  { hex: '#1e98ff', name: 'Голубой' },
+  { hex: '#177bc9', name: 'Синий' },
+  { hex: '#0e4779', name: 'Тёмно-синий' },
   { hex: '#ffd21e', name: 'Жёлтый' },
-  { hex: '#1bad03', name: 'Зелёный' },
+  { hex: '#ff931e', name: 'Оранжевый' },
+  { hex: '#e6761b', name: 'Тёмно-оранжевый' },
+  { hex: '#ed4543', name: 'Красный' },
   { hex: '#56db40', name: 'Светло-зелёный' },
-  { hex: '#1e98ff', name: 'Синий' },
-  { hex: '#82cdff', name: 'Голубой' },
-  { hex: '#b51eff', name: 'Фиолетовый' },
+  { hex: '#1bad03', name: 'Зелёный' },
+  { hex: '#97a100', name: 'Оливковый' },
+  { hex: '#595959', name: 'Серый' },
+  { hex: '#b3b3b3', name: 'Светло-серый' },
   { hex: '#f371d1', name: 'Розовый' },
-  { hex: '#595959', name: 'Серый' }
+  { hex: '#b51eff', name: 'Фиолетовый' },
+  { hex: '#793d0e', name: 'Коричневый' }
 ];
 
-const DEFAULT_COLOR = '#d61f5e';
+const DEFAULT_COLOR = '#1e98ff'; // дефолт Яндекса
 
 const Utils = {
   escapeHtml(s) {
@@ -1053,7 +1100,7 @@ const Utils = {
     return '#' + rr + gg + bb;
   },
   hexToYandexColor(hex) {
-    if (!hex || hex.length !== 7) return 'ff5e1fd6';
+    if (!hex || hex.length !== 7) return 'ff1e98ff';
     const rr = hex.substring(1, 3);
     const gg = hex.substring(3, 5);
     const bb = hex.substring(5, 7);
@@ -1123,31 +1170,133 @@ const state = {
   photosWithoutGps: [],
   counter: 0,
   manualMode: false,
-  basemap: '2gis',
+  basemap: 'google',
   firstPointAdded: false,
   markerSize: 8,
   selectionMode: false,
   selectedPoints: [],
-  activeColor: COLOR_PALETTE[0].hex,
+  activeColor: COLOR_PALETTE[1].hex,
   selectionRect: null,
   selectionStartPoint: null,
   isDrawing: false,
   moveMode: false,
   movingPoint: null,
-  isMoving: false
+  isMoving: false,
+  activeFilter: 'all'
 };
 
 const BASEMAPS = {
-  '2gis': { layers: [{ url: 'https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}', opts: {maxZoom:18} }] },
   'google': { layers: [{ url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', opts: {maxZoom:21} }] },
   'google_sat': { layers: [{ url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', opts: {maxZoom:21} }] },
-  'google_hybrid': { layers: [{ url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', opts: {maxZoom:21} }] }
+  'google_hybrid': { layers: [{ url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', opts: {maxZoom:21} }] },
+  '2gis': { layers: [{ url: 'https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}', opts: {maxZoom:18} }] }
 };
 
 let map, currentTiles = [];
 let currentOperation = null;
 
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+// ===== ФИЛЬТРАЦИЯ =====
+function filteredPoints() {
+  return state.points.filter(p =>
+    state.activeFilter === 'all' || p.color === state.activeFilter
+  );
+}
+
+function isPointVisible(point) {
+  return state.activeFilter === 'all' || point.color === state.activeFilter;
+}
+
+function applyFilterToMarkers() {
+  if (!map) return;
+  state.points.forEach(p => {
+    if (!p.marker) return;
+    const visible = isPointVisible(p);
+    if (visible) {
+      if (!map.hasLayer(p.marker)) p.marker.addTo(map);
+    } else {
+      if (map.hasLayer(p.marker)) map.removeLayer(p.marker);
+    }
+  });
+  updateFilterIndicator();
+}
+
+function updateFilterIndicator() {
+  const ind = document.getElementById('filterIndicator');
+  const dot = document.getElementById('filterIndicatorDot');
+  const text = document.getElementById('filterIndicatorText');
+  if (!ind || !dot || !text) return;
+  if (state.activeFilter === 'all') {
+    ind.classList.remove('show');
+  } else {
+    const color = COLOR_PALETTE.find(c => c.hex === state.activeFilter);
+    if (color) {
+      dot.style.backgroundColor = color.hex;
+      const visibleCount = filteredPoints().length;
+      text.textContent = `${color.name} · ${visibleCount} из ${state.points.length}`;
+      ind.classList.add('show');
+    }
+  }
+}
+
+function buildFilterBar() {
+  const bar = document.getElementById('filterBar');
+  if (!bar) return;
+  let h = '<span class="filter-label">Фильтр:</span>';
+  h += '<div class="filter-btn all active" data-color="all" onclick="handleColorClick(\'all\',this)" title="Показать все">ВСЕ</div>';
+  COLOR_PALETTE.forEach(c => {
+    h += '<div class="filter-btn" style="background:' + c.hex + '" title="' + c.name + '" data-color="' + c.hex + '" onclick="handleColorClick(\'' + c.hex + '\',this)"></div>';
+  });
+  bar.innerHTML = h;
+}
+
+// Единый обработчик клика по палитре: фильтр в обычном режиме, перекраска в режиме выделения
+window.handleColorClick = function(color, el) {
+  if (state.selectionMode) {
+    // Режим выделения — палитра работает как перекраска
+    if (color === 'all') {
+      UI.toast('В режиме выделения выберите цвет для перекраски', 'warning', 2000);
+      return;
+    }
+    state.activeColor = color;
+    if (state.selectedPoints.length > 0) {
+      SelectionModule.applyColorToSelected(color);
+    } else {
+      UI.toast('Сначала выделите точки прямоугольником на карте', 'warning', 2500);
+    }
+  } else {
+    // Обычный режим — палитра работает как фильтр
+    setFilter(color, el);
+  }
+};
+
+window.setFilter = function(c, el) {
+  if (state.selectionMode) return;
+  state.activeFilter = c;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  applyFilterToMarkers();
+  Storage.save(MapModule.serializeProject());
+  
+  if (c === 'all') {
+    UI.toast('Фильтр сброшен', 'info', 1500);
+  } else {
+    const color = COLOR_PALETTE.find(x => x.hex === c);
+    const count = filteredPoints().length;
+    UI.toast(`Фильтр: ${color ? color.name : c} (${count} точек)`, 'info', 2000);
+  }
+};
+
+window.resetFilter = function() {
+  state.activeFilter = 'all';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  const allBtn = document.querySelector('.filter-btn.all');
+  if (allBtn) allBtn.classList.add('active');
+  applyFilterToMarkers();
+  Storage.save(MapModule.serializeProject());
+  UI.toast('Фильтр сброшен', 'info', 1500);
+};
 
 const HistoryManager = {
   history: [],
@@ -1160,24 +1309,19 @@ const HistoryManager = {
   
   push(op) {
     if (this.isUndoRedo) return;
-    
     if (this.batchMode) {
       this.batchOperations.push(op);
       return;
     }
-    
     if (this.index < this.history.length - 1) {
       this.history = this.history.slice(0, this.index + 1);
     }
-    
     this.history.push(op);
-    
     if (this.history.length > this.maxSize) {
       this.history.shift();
     } else {
       this.index++;
     }
-    
     this.updateButtons();
   },
   
@@ -1202,93 +1346,53 @@ const HistoryManager = {
   
   undo() {
     if (this.index < 0) return;
-    
     const op = this.history[this.index];
     this.isUndoRedo = true;
-    
-    try {
-      this._reverseOperation(op);
-    } finally {
-      this.isUndoRedo = false;
-    }
-    
+    try { this._reverseOperation(op); } finally { this.isUndoRedo = false; }
     this.index--;
     this.updateButtons();
     MapModule.updateStats();
+    applyFilterToMarkers();
     Storage.save(MapModule.serializeProject());
     UI.toast('↶ Отменено: ' + this._describe(op), 'info', 1500);
   },
   
   redo() {
     if (this.index >= this.history.length - 1) return;
-    
     this.index++;
     const op = this.history[this.index];
     this.isUndoRedo = true;
-    
-    try {
-      this._applyOperation(op);
-    } finally {
-      this.isUndoRedo = false;
-    }
-    
+    try { this._applyOperation(op); } finally { this.isUndoRedo = false; }
     this.updateButtons();
     MapModule.updateStats();
+    applyFilterToMarkers();
     Storage.save(MapModule.serializeProject());
     UI.toast('↷ Повторено: ' + this._describe(op), 'info', 1500);
   },
   
   _reverseOperation(op) {
     switch(op.type) {
-      case 'add':
-        MapModule.removePointInternal(op.point.id);
-        break;
-      case 'delete':
-        MapModule.restorePoint(op.point);
-        break;
-      case 'move':
-        MapModule.movePointInternal(op.id, op.oldLat, op.oldLng);
-        break;
-      case 'color':
-        MapModule.setColorInternal(op.id, op.oldColor);
-        break;
-      case 'multiColor':
-        op.changes.forEach(c => MapModule.setColorInternal(c.id, c.oldColor));
-        break;
+      case 'add': MapModule.removePointInternal(op.point.id); break;
+      case 'delete': MapModule.restorePoint(op.point); break;
+      case 'move': MapModule.movePointInternal(op.id, op.oldLat, op.oldLng); break;
+      case 'color': MapModule.setColorInternal(op.id, op.oldColor); break;
+      case 'multiColor': op.changes.forEach(c => MapModule.setColorInternal(c.id, c.oldColor)); break;
       case 'batch':
-        for (let i = op.operations.length - 1; i >= 0; i--) {
-          this._reverseOperation(op.operations[i]);
-        }
+        for (let i = op.operations.length - 1; i >= 0; i--) this._reverseOperation(op.operations[i]);
         break;
-      case 'clear':
-        op.points.forEach(p => MapModule.restorePoint(p));
-        break;
+      case 'clear': op.points.forEach(p => MapModule.restorePoint(p)); break;
     }
   },
   
   _applyOperation(op) {
     switch(op.type) {
-      case 'add':
-        MapModule.restorePoint(op.point);
-        break;
-      case 'delete':
-        MapModule.removePointInternal(op.point.id);
-        break;
-      case 'move':
-        MapModule.movePointInternal(op.id, op.newLat, op.newLng);
-        break;
-      case 'color':
-        MapModule.setColorInternal(op.id, op.newColor);
-        break;
-      case 'multiColor':
-        op.changes.forEach(c => MapModule.setColorInternal(c.id, c.newColor));
-        break;
-      case 'batch':
-        op.operations.forEach(o => this._applyOperation(o));
-        break;
-      case 'clear':
-        MapModule.clearAllInternal();
-        break;
+      case 'add': MapModule.restorePoint(op.point); break;
+      case 'delete': MapModule.removePointInternal(op.point.id); break;
+      case 'move': MapModule.movePointInternal(op.id, op.newLat, op.newLng); break;
+      case 'color': MapModule.setColorInternal(op.id, op.newColor); break;
+      case 'multiColor': op.changes.forEach(c => MapModule.setColorInternal(c.id, c.newColor)); break;
+      case 'batch': op.operations.forEach(o => this._applyOperation(o)); break;
+      case 'clear': MapModule.clearAllInternal(); break;
     }
   },
   
@@ -1349,7 +1453,6 @@ async function reverseGeocode(lat, lng, cache) {
     Storage.saveAddressCache(cache);
     return result;
   } catch(err) {
-    console.error('Geocoding error:', err);
     const fallback = { city: 'Ошибка сети', address: 'Адрес не найден', found: false };
     cache[key] = fallback;
     return fallback;
@@ -1368,7 +1471,6 @@ async function forwardGeocode(address) {
     }
     return { found: false, lat: null, lng: null, displayName: null };
   } catch(err) {
-    console.error('Forward geocoding error:', err);
     return { found: false, lat: null, lng: null, displayName: null };
   }
 }
@@ -1376,24 +1478,18 @@ async function forwardGeocode(address) {
 window._detailsList = [];
 function showDetailsModal(title, items, description) {
   const modal = document.getElementById('detailsModal');
-  const modalTitle = document.getElementById('detailsTitle');
-  const stats = document.getElementById('detailsStats');
-  const list = document.getElementById('detailsList');
-  modalTitle.textContent = title;
-  stats.innerHTML = `<b>Количество:</b> ${items.length}<br><small>${description}</small>`;
-  list.innerHTML = items.map(item => `<div>${Utils.escapeHtml(item)}</div>`).join('');
+  document.getElementById('detailsTitle').textContent = title;
+  document.getElementById('detailsStats').innerHTML = `<b>Количество:</b> ${items.length}<br><small>${description}</small>`;
+  document.getElementById('detailsList').innerHTML = items.map(item => `<div>${Utils.escapeHtml(item)}</div>`).join('');
   modal.classList.add('show');
   window._detailsList = items;
 }
 
 window.copyDetailsList = function() {
   if (window._detailsList && window._detailsList.length > 0) {
-    const text = window._detailsList.join('\n');
-    navigator.clipboard.writeText(text).then(() => {
-      UI.toast('Список скопирован в буфер обмена', 'success');
-    }).catch(() => {
-      UI.toast('Не удалось скопировать', 'error');
-    });
+    navigator.clipboard.writeText(window._detailsList.join('\n')).then(() => {
+      UI.toast('Список скопирован', 'success');
+    }).catch(() => UI.toast('Не удалось скопировать', 'error'));
   }
 };
 
@@ -1408,21 +1504,16 @@ const BatchProcessor = {
     
     modal.classList.add('show');
     title.textContent = '📷 Загрузка фотографий';
-    progressText.textContent = 'Подготовка к загрузке фото...';
+    progressText.textContent = 'Подготовка...';
     progressDetail.textContent = '';
     cancelBtn.style.display = 'inline-block';
     cancelBtn.textContent = 'Отмена';
     
     const arr = [...files].filter(f => f.type.startsWith('image/'));
-    if (!arr.length) {
-      UI.toast('Выбраны не изображения', 'error');
-      modal.classList.remove('show');
-      return;
-    }
+    if (!arr.length) { UI.toast('Выбраны не изображения', 'error'); modal.classList.remove('show'); return; }
     
     let fromExif = 0, fromFilename = 0, noGps = 0, duplicates = 0;
-    const noGpsList = [];
-    const duplicateList = [];
+    const noGpsList = [], duplicateList = [];
     let cancelled = false;
     currentOperation = () => { cancelled = true; };
     const total = arr.length;
@@ -1430,122 +1521,71 @@ const BatchProcessor = {
     HistoryManager.beginBatch('Загрузка фото');
     
     for (let i = 0; i < total; i += batchSize) {
-      if (cancelled) {
-        progressText.textContent = 'Отменено пользователем';
-        progressDetail.textContent = `Обработано ${i} из ${total} фото`;
-        await sleep(1500);
-        modal.classList.remove('show');
-        currentOperation = null;
-        HistoryManager.endBatch();
-        return;
-      }
-      
+      if (cancelled) { await sleep(1000); modal.classList.remove('show'); currentOperation = null; HistoryManager.endBatch(); return; }
       const batch = arr.slice(i, i + batchSize);
-      const batchPromises = batch.map(f => PhotoModule.processOne(f));
-      const results = await Promise.all(batchPromises);
-      
+      const results = await Promise.all(batch.map(f => PhotoModule.processOne(f)));
       results.forEach((result, idx) => {
         const file = batch[idx];
         if (result === 'exif') fromExif++;
         else if (result === 'filename') fromFilename++;
-        else if (result === 'duplicate') {
-          duplicates++;
-          duplicateList.push(file.name);
-        } else {
-          noGps++;
-          noGpsList.push(file.name);
-        }
+        else if (result === 'duplicate') { duplicates++; duplicateList.push(file.name); }
+        else { noGps++; noGpsList.push(file.name); }
       });
-      
       const percent = Math.round(((i + batch.length) / total) * 100);
       progressBar.style.width = percent + '%';
-      progressText.textContent = `Загрузка фото ${i + batch.length} из ${total} (${percent}%)`;
-      progressDetail.textContent = `EXIF: ${fromExif} | Из названия: ${fromFilename} | Без GPS: ${noGps} | Дубликатов: ${duplicates}`;
+      progressText.textContent = `${i + batch.length} из ${total} (${percent}%)`;
+      progressDetail.textContent = `EXIF: ${fromExif} | Название: ${fromFilename} | Без GPS: ${noGps} | Дубликатов: ${duplicates}`;
       await sleep(100);
     }
     
     HistoryManager.endBatch();
+    applyFilterToMarkers();
     
-    progressText.textContent = '✓ Завершено!';
-    progressDetail.textContent = `Загружено ${total} фото. EXIF: ${fromExif}, Название: ${fromFilename}, Без GPS: ${noGps}, Дубликатов: ${duplicates}`;
+    progressText.textContent = '✓ Завершено';
     cancelBtn.style.display = 'none';
     currentOperation = null;
     await sleep(1000);
     modal.classList.remove('show');
     
     let msg = `Загружено ${total} фото`;
-    if (fromExif > 0) msg += `, ${fromExif} из EXIF ✓`;
-    if (fromFilename > 0) msg += `, ${fromFilename} из названия ✓`;
-    if (duplicates > 0) msg += `, ${duplicates} дубликатов`;
-    if (noGps > 0) msg += `, ${noGps} без GPS ✗`;
+    if (fromExif > 0) msg += `, ${fromExif} из EXIF`;
+    if (fromFilename > 0) msg += `, ${fromFilename} из названия`;
     UI.toast(msg, (fromExif + fromFilename) > 0 ? 'success' : 'warning', 5000);
     
     if (noGpsList.length > 0) {
-      setTimeout(() => {
-        showDetailsModal(
-          '❌ Фото без геолокации',
-          noGpsList,
-          'Эти фото не содержат GPS ни в метаданных, ни в имени файла. Для отображения на карте переименуйте их в формате "широта,долгота_имя.jpg" и загрузите снова.'
-        );
-      }, 500);
-    }
-    if (duplicateList.length > 0 && noGpsList.length === 0) {
-      setTimeout(() => {
-        showDetailsModal(
-          '⚠️ Дубликаты точек',
-          duplicateList,
-          'Эти фото были отфильтрованы как дубликаты — точки с такими координатами уже есть на карте.'
-        );
-      }, 500);
+      setTimeout(() => showDetailsModal('❌ Без GPS', noGpsList, 'Переименуйте в формате "широта,долгота_имя.jpg"'), 500);
     }
   },
   
   async importKMLBatch(file, batchSize = 50, withColors = false) {
     const modal = document.getElementById('progressModal');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    const progressDetail = document.getElementById('progressDetail');
-    const cancelBtn = document.getElementById('progressCancelBtn');
-    const title = document.getElementById('progressTitle');
-    
     modal.classList.add('show');
-    title.textContent = withColors ? '🌈 Импорт цветной KML' : '🌐 Импорт одноцветного KML';
-    progressText.textContent = 'Чтение KML файла...';
-    progressDetail.textContent = '';
-    cancelBtn.style.display = 'inline-block';
-    cancelBtn.textContent = 'Отмена';
+    document.getElementById('progressTitle').textContent = withColors ? ' Импорт цветной KML' : ' Импорт KML';
+    document.getElementById('progressText').textContent = 'Чтение KML...';
+    document.getElementById('progressDetail').textContent = '';
+    document.getElementById('progressCancelBtn').textContent = 'Отмена';
+    document.getElementById('progressCancelBtn').style.display = 'inline-block';
     
     let cancelled = false;
     currentOperation = () => { cancelled = true; };
     
     try {
       const text = await file.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/xml');
-      
-      if (doc.querySelector('parsererror')) {
-        throw new Error('Некорректный KML файл');
-      }
+      const doc = new DOMParser().parseFromString(text, 'text/xml');
+      if (doc.querySelector('parsererror')) throw new Error('Некорректный KML');
       
       const placemarks = doc.getElementsByTagName('Placemark');
       const points = [];
-      
       for (const pm of placemarks) {
         const pointNode = pm.getElementsByTagName('Point')[0];
         if (!pointNode) continue;
-        
         const coordsNode = pointNode.getElementsByTagName('coordinates')[0];
         if (!coordsNode) continue;
-        
         const parts = coordsNode.textContent.trim().split(',');
-        const lng = parseFloat(parts[0]);
-        const lat = parseFloat(parts[1]);
-        
+        const lng = parseFloat(parts[0]), lat = parseFloat(parts[1]);
         if (!isFinite(lat) || !isFinite(lng)) continue;
-        
         const nameNode = pm.getElementsByTagName('name')[0];
         const name = nameNode ? nameNode.textContent.trim() : '';
-        
         let color = DEFAULT_COLOR;
         if (withColors) {
           const styleNode = pm.getElementsByTagName('Style')[0];
@@ -1553,66 +1593,41 @@ const BatchProcessor = {
             const iconStyle = styleNode.getElementsByTagName('IconStyle')[0];
             if (iconStyle) {
               const colorNode = iconStyle.getElementsByTagName('color')[0];
-              if (colorNode) {
-                const yandexColor = colorNode.textContent.trim();
-                color = Utils.yandexColorToHex(yandexColor);
-              }
+              if (colorNode) color = Utils.yandexColorToHex(colorNode.textContent.trim());
             }
           }
         }
-        
         points.push({ lat, lng, name, color });
       }
       
-      if (!points.length) {
-        UI.toast('В файле не найдено точек', 'error');
-        modal.classList.remove('show');
-        currentOperation = null;
-        return;
-      }
-      
-      progressText.textContent = `Найдено ${points.length} точек. Добавление...`;
+      if (!points.length) { UI.toast('В файле нет точек', 'error'); modal.classList.remove('show'); currentOperation = null; return; }
       
       let added = 0, skipped = 0;
       const duplicateList = [];
       const total = points.length;
-      
       HistoryManager.beginBatch(withColors ? 'Импорт цветного KML' : 'Импорт KML');
       
       for (let i = 0; i < total; i += batchSize) {
-        if (cancelled) {
-          progressText.textContent = 'Отменено пользователем';
-          progressDetail.textContent = `Добавлено ${added} из ${total} точек`;
-          await sleep(1500);
-          modal.classList.remove('show');
-          currentOperation = null;
-          HistoryManager.endBatch();
-          return;
-        }
-        
+        if (cancelled) { await sleep(1000); modal.classList.remove('show'); currentOperation = null; HistoryManager.endBatch(); return; }
         const batch = points.slice(i, i + batchSize);
         batch.forEach(pt => {
           if (MapModule.addPoint(pt.lat, pt.lng, null, 'kml', pt.name, pt.color)) added++;
-          else {
-            skipped++;
-            duplicateList.push(pt.name || `Координаты ${pt.lat.toFixed(5)},${pt.lng.toFixed(5)}`);
-          }
+          else { skipped++; duplicateList.push(pt.name || `${pt.lat.toFixed(5)},${pt.lng.toFixed(5)}`); }
         });
-        
         const percent = Math.round(((i + batch.length) / total) * 100);
-        progressBar.style.width = percent + '%';
-        progressText.textContent = `Импорт KML ${i + batch.length} из ${total} (${percent}%)`;
-        progressDetail.textContent = `Добавлено: ${added} | Пропущено (дубликаты): ${skipped}`;
+        document.getElementById('progressBar').style.width = percent + '%';
+        document.getElementById('progressText').textContent = `${i + batch.length} из ${total}`;
+        document.getElementById('progressDetail').textContent = `Добавлено: ${added} | Пропущено: ${skipped}`;
         await sleep(50);
       }
       
       HistoryManager.endBatch();
+      applyFilterToMarkers();
       
-      progressText.textContent = '✓ Завершено!';
-      progressDetail.textContent = `Импортировано ${added} точек`;
-      cancelBtn.style.display = 'none';
+      document.getElementById('progressText').textContent = '✓ Завершено';
+      document.getElementById('progressCancelBtn').style.display = 'none';
       currentOperation = null;
-      await sleep(1000);
+      await sleep(800);
       modal.classList.remove('show');
       
       let msg = `Импортировано ${added} точек`;
@@ -1620,41 +1635,26 @@ const BatchProcessor = {
       UI.toast(msg, 'success');
       
       if (state.points.length > 0 && added > 0) {
-        const bounds = L.latLngBounds(state.points.map(p => [p.lat, p.lng]));
-        map.fitBounds(bounds.pad(0.2));
-      }
-      
-      if (duplicateList.length > 0) {
-        setTimeout(() => {
-          showDetailsModal(
-            '⚠️ Дубликаты точек (KML)',
-            duplicateList,
-            'Эти точки из KML были отфильтрованы — точки с такими координатами уже есть на карте.'
-          );
-        }, 500);
+        try {
+          const bounds = L.latLngBounds(state.points.map(p => [p.lat, p.lng]));
+          map.fitBounds(bounds.pad(0.2));
+        } catch(e){}
       }
     } catch(err) {
       modal.classList.remove('show');
       currentOperation = null;
       HistoryManager.endBatch();
-      UI.toast('Ошибка импорта: ' + err.message, 'error');
+      UI.toast('Ошибка: ' + err.message, 'error');
     }
   },
   
   async importAddressesFromTXT(file) {
     const modal = document.getElementById('progressModal');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    const progressDetail = document.getElementById('progressDetail');
-    const cancelBtn = document.getElementById('progressCancelBtn');
-    const title = document.getElementById('progressTitle');
-    
     modal.classList.add('show');
-    title.textContent = '📍 Импорт адресов';
-    progressText.textContent = 'Чтение файла...';
-    progressDetail.textContent = '';
-    cancelBtn.style.display = 'inline-block';
-    cancelBtn.textContent = 'Отмена';
+    document.getElementById('progressTitle').textContent = '📍 Импорт адресов';
+    document.getElementById('progressText').textContent = 'Чтение...';
+    document.getElementById('progressDetail').textContent = '';
+    document.getElementById('progressCancelBtn').textContent = 'Отмена';
     
     let cancelled = false;
     currentOperation = () => { cancelled = true; };
@@ -1662,103 +1662,42 @@ const BatchProcessor = {
     try {
       const text = await file.text();
       const addresses = text.split('\n').map(l => l.trim()).filter(l => l);
+      if (!addresses.length) { UI.toast('Файл пуст', 'error'); modal.classList.remove('show'); currentOperation = null; return; }
       
-      if (!addresses.length) {
-        UI.toast('В файле не найдено адресов', 'error');
-        modal.classList.remove('show');
-        currentOperation = null;
-        return;
-      }
-      
-      progressText.textContent = `Найдено ${addresses.length} адресов. Геокодирование...`;
-      
-      let added = 0, notFound = 0, duplicates = 0;
+      let added = 0, notFound = 0;
       const notFoundList = [];
-      const duplicateList = [];
       const total = addresses.length;
-      
       HistoryManager.beginBatch('Импорт адресов');
       
       for (let i = 0; i < total; i++) {
-        if (cancelled) {
-          progressText.textContent = 'Отменено пользователем';
-          progressDetail.textContent = `Обработано ${i} из ${total} адресов`;
-          await sleep(1500);
-          modal.classList.remove('show');
-          currentOperation = null;
-          HistoryManager.endBatch();
-          return;
-        }
-        
-        const address = addresses[i];
-        const percent = Math.round(((i + 1) / total) * 100);
-        
-        progressBar.style.width = percent + '%';
-        progressText.textContent = `Обработка ${i + 1} из ${total} (${percent}%)`;
-        progressDetail.textContent = `Адрес: ${address}`;
-        
-        const result = await forwardGeocode(address);
-        
+        if (cancelled) { await sleep(1000); modal.classList.remove('show'); currentOperation = null; HistoryManager.endBatch(); return; }
+        const result = await forwardGeocode(addresses[i]);
         if (result.found) {
-          if (MapModule.addPoint(result.lat, result.lng, null, 'address', address)) {
-            added++;
-            progressDetail.textContent = `✓ Найдено: ${result.displayName}`;
-          } else {
-            duplicates++;
-            duplicateList.push(address);
-            progressDetail.textContent = `⚠ Дубликат: ${result.displayName}`;
-          }
-        } else {
-          notFound++;
-          notFoundList.push(address);
-          progressDetail.textContent = `✗ Не найдено: ${address}`;
-        }
-        
+          if (MapModule.addPoint(result.lat, result.lng, null, 'address', addresses[i])) added++;
+        } else { notFound++; notFoundList.push(addresses[i]); }
+        const percent = Math.round(((i + 1) / total) * 100);
+        document.getElementById('progressBar').style.width = percent + '%';
+        document.getElementById('progressText').textContent = `${i + 1} из ${total}`;
+        document.getElementById('progressDetail').textContent = result.found ? `✓ ${result.displayName}` : `✗ ${addresses[i]}`;
         await sleep(1000);
       }
       
       HistoryManager.endBatch();
+      applyFilterToMarkers();
       
-      progressText.textContent = '✓ Завершено!';
-      progressDetail.textContent = `Добавлено: ${added} | Не найдено: ${notFound} | Дубликатов: ${duplicates}`;
-      cancelBtn.style.display = 'none';
+      document.getElementById('progressText').textContent = '✓ Завершено';
+      document.getElementById('progressCancelBtn').style.display = 'none';
       currentOperation = null;
-      await sleep(1000);
+      await sleep(800);
       modal.classList.remove('show');
       
-      let msg = `Импортировано ${added} адресов`;
-      if (notFound > 0) msg += `, ${notFound} не найдено`;
-      if (duplicates > 0) msg += `, ${duplicates} дубликатов`;
-      UI.toast(msg, added > 0 ? 'success' : 'warning', 5000);
-      
-      if (state.points.length > 0 && added > 0) {
-        const bounds = L.latLngBounds(state.points.map(p => [p.lat, p.lng]));
-        map.fitBounds(bounds.pad(0.2));
-      }
-      
-      if (notFoundList.length > 0) {
-        setTimeout(() => {
-          showDetailsModal(
-            '❌ Адреса не найдены',
-            notFoundList,
-            'Эти адреса не удалось найти в базе адресов. Проверьте правильность написания и попробуйте снова.'
-          );
-        }, 500);
-      }
-      if (duplicateList.length > 0 && notFoundList.length === 0) {
-        setTimeout(() => {
-          showDetailsModal(
-            '⚠️ Дубликаты адресов',
-            duplicateList,
-            'Эти адреса уже есть на карте — точки с такими координатами уже добавлены.'
-          );
-        }, 500);
-      }
+      UI.toast(`Добавлено: ${added}, не найдено: ${notFound}`, added > 0 ? 'success' : 'warning', 5000);
+      if (notFoundList.length > 0) setTimeout(() => showDetailsModal('❌ Не найдено', notFoundList, 'Проверьте написание'), 500);
     } catch(err) {
       modal.classList.remove('show');
       currentOperation = null;
       HistoryManager.endBatch();
-      UI.toast('Ошибка импорта: ' + err.message, 'error');
+      UI.toast('Ошибка: ' + err.message, 'error');
     }
   },
   
@@ -1766,10 +1705,8 @@ const BatchProcessor = {
     try {
       const text = await file.text();
       const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-      let added = 0, skipped = 0, invalid = 0;
-      const duplicateList = [];
+      let added = 0, invalid = 0;
       const invalidList = [];
-      
       HistoryManager.beginBatch('Импорт координат TXT');
       
       lines.forEach((line, idx) => {
@@ -1778,54 +1715,15 @@ const BatchProcessor = {
           const lat = parseFloat(parts[0]), lng = parseFloat(parts[1]);
           if (isFinite(lat) && isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
             if (MapModule.addPoint(lat, lng, null, 'txt', `Строка ${idx + 1}`)) added++;
-            else {
-              skipped++;
-              duplicateList.push(`Строка ${idx + 1}: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-            }
-          } else {
-            invalid++;
-            invalidList.push(`Строка ${idx + 1}: ${line}`);
-          }
-        } else if (line) {
-          invalid++;
-          invalidList.push(`Строка ${idx + 1}: ${line}`);
-        }
+          } else { invalid++; invalidList.push(`Строка ${idx + 1}: ${line}`); }
+        } else if (line) { invalid++; invalidList.push(`Строка ${idx + 1}: ${line}`); }
       });
       
       HistoryManager.endBatch();
+      applyFilterToMarkers();
       
-      if (added === 0 && invalid === 0) {
-        UI.toast('В файле не найдено координат', 'error');
-        return;
-      }
-      
-      let msg = `Импортировано ${added} координат`;
-      if (skipped > 0) msg += `, ${skipped} дубликатов`;
-      if (invalid > 0) msg += `, ${invalid} некорректных строк`;
-      UI.toast(msg, added > 0 ? 'success' : 'warning');
-      
-      if (state.points.length > 0 && added > 0) {
-        const bounds = L.latLngBounds(state.points.map(p => [p.lat, p.lng]));
-        map.fitBounds(bounds.pad(0.2));
-      }
-      
-      if (invalidList.length > 0) {
-        setTimeout(() => {
-          showDetailsModal(
-            '⚠️ Некорректные строки',
-            invalidList,
-            'Эти строки не удалось распознать как координаты. Ожидаемый формат: "широта,долгота" (например, 57.33402,61.92401).'
-          );
-        }, 500);
-      } else if (duplicateList.length > 0) {
-        setTimeout(() => {
-          showDetailsModal(
-            '⚠️ Дубликаты координат',
-            duplicateList,
-            'Эти координаты уже есть на карте.'
-          );
-        }, 500);
-      }
+      UI.toast(`Добавлено: ${added}${invalid > 0 ? ', некорректных: ' + invalid : ''}`, added > 0 ? 'success' : 'warning');
+      if (invalidList.length > 0) setTimeout(() => showDetailsModal('️ Некорректные строки', invalidList, 'Формат: широта,долгота'), 500);
     } catch(err) {
       HistoryManager.endBatch();
       UI.toast('Ошибка: ' + err.message, 'error');
@@ -1834,235 +1732,117 @@ const BatchProcessor = {
 };
 
 async function exportCSVWithAddresses() {
-  if (state.points.length === 0) {
-    UI.toast('Нет точек для выгрузки', 'warning');
-    return;
-  }
+  const pts = filteredPoints();
+  if (!pts.length) { UI.toast('Нет точек для экспорта', 'warning'); return; }
   
   const modal = document.getElementById('progressModal');
-  const progressBar = document.getElementById('progressBar');
-  const progressText = document.getElementById('progressText');
-  const progressDetail = document.getElementById('progressDetail');
-  const cancelBtn = document.getElementById('progressCancelBtn');
-  const title = document.getElementById('progressTitle');
-  
   modal.classList.add('show');
-  title.textContent = '📋 Экспорт CSV (координаты+адрес)';
-  progressText.textContent = 'Подготовка...';
-  progressDetail.textContent = '';
-  cancelBtn.style.display = 'inline-block';
-  cancelBtn.textContent = 'Отмена';
+  document.getElementById('progressTitle').textContent = '📋 Экспорт CSV';
+  document.getElementById('progressText').textContent = 'Подготовка...';
+  document.getElementById('progressDetail').textContent = '';
+  document.getElementById('progressCancelBtn').textContent = 'Отмена';
   
   let cancelled = false;
   currentOperation = () => { cancelled = true; };
   
   const cache = Storage.getAddressCache();
-  const total = state.points.length;
+  const total = pts.length;
   const results = [];
   const today = new Date().toLocaleDateString('ru-RU');
   let cached = 0, fetched = 0, notFound = 0;
   const notFoundList = [];
   
   for (let i = 0; i < total; i++) {
-    if (cancelled) {
-      progressText.textContent = 'Отменено пользователем';
-      progressDetail.textContent = `Обработано ${i} из ${total} точек`;
-      await sleep(1500);
-      modal.classList.remove('show');
-      currentOperation = null;
-      return;
-    }
-    
-    const point = state.points[i];
+    if (cancelled) { await sleep(1000); modal.classList.remove('show'); currentOperation = null; return; }
+    const point = pts[i];
     const key = Utils.cacheKey(point.lat, point.lng);
     const wasCached = !!cache[key];
-    const percent = Math.round(((i + 1) / total) * 100);
-    
-    progressBar.style.width = percent + '%';
-    progressText.textContent = `Обработка ${i + 1} из ${total} (${percent}%)`;
-    progressDetail.textContent = 'Запрос адреса...';
-    
     const addr = await reverseGeocode(point.lat, point.lng, cache);
-    
     if (wasCached) cached++; else fetched++;
-    if (!addr.found) {
-      notFound++;
-      notFoundList.push(`${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`);
-    }
-    
-    progressDetail.textContent = addr.found
-      ? `✓ ${addr.city}, ${addr.address} ${wasCached ? '(из кэша)' : ''}`
-      : `✗ ${addr.city} — ${addr.address}`;
-    
+    if (!addr.found) { notFound++; notFoundList.push(`${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`); }
     results.push({
-      id: i + 1,
-      city: addr.city,
-      address: addr.address,
-      lat: point.lat.toFixed(6),
-      lng: point.lng.toFixed(6),
-      photo: 'вставьте ссылку на фото или папку',
-      adType: 'выберите вид рекламы в табличке',
-      date: today,
-      comment: point.filename || ''
+      city: addr.city, address: addr.address,
+      lat: point.lat.toFixed(6), lng: point.lng.toFixed(6),
+      photo: 'вставьте ссылку', adType: 'выберите вид рекламы',
+      date: today, comment: point.filename || ''
     });
-    
-    if (i < total - 1 && !wasCached) {
-      await sleep(1000);
-    }
+    const percent = Math.round(((i + 1) / total) * 100);
+    document.getElementById('progressBar').style.width = percent + '%';
+    document.getElementById('progressText').textContent = `${i + 1} из ${total}`;
+    document.getElementById('progressDetail').textContent = addr.found ? `✓ ${addr.address}` : ` не найдено`;
+    if (i < total - 1 && !wasCached) await sleep(1000);
   }
-  
-  progressText.textContent = 'Формирование CSV...';
-  progressDetail.textContent = 'Почти готово!';
-  progressBar.style.width = '100%';
-  await sleep(500);
   
   const headers = ['Район/проект', 'Адрес', 'Широта', 'Долгота', 'Фото', 'Вид рекламы', 'Дата размещения', 'Комментарий'];
   const csvRows = [headers.join(';')];
-  
   results.forEach(r => {
-    const row = [
-      r.city, r.address, r.lat, r.lng, r.photo, r.adType, r.date, r.comment
-    ].map(v => '"' + String(v).replace(/"/g, '""') + '"');
+    const row = [r.city, r.address, r.lat, r.lng, r.photo, r.adType, r.date, r.comment]
+      .map(v => '"' + String(v).replace(/"/g, '""') + '"');
     csvRows.push(row.join(';'));
   });
-  
   const csvContent = '\uFEFF' + csvRows.join('\n');
   const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = 'promo_addresses_' + new Date().toISOString().slice(0,10) + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   
-  progressText.textContent = '✓ Готово!';
-  progressDetail.textContent = `Выгружено ${total} адресов (кэш: ${cached}, новых: ${fetched}). Файл скачан.`;
-  cancelBtn.style.display = 'none';
+  document.getElementById('progressText').textContent = '✓ Готово';
+  document.getElementById('progressCancelBtn').style.display = 'none';
   currentOperation = null;
-  await sleep(1500);
+  await sleep(800);
   modal.classList.remove('show');
   
-  let msg = `CSV выгружен: ${total} точек (из кэша: ${cached}, новых: ${fetched})`;
-  if (notFound > 0) msg += `, ${notFound} без адреса`;
+  let msg = `CSV: ${total} точек (кэш: ${cached}, новых: ${fetched})`;
+  if (state.activeFilter !== 'all') msg += ` · фильтр: ${total} из ${state.points.length}`;
   UI.toast(msg, 'success');
   
-  if (notFoundList.length > 0) {
-    setTimeout(() => {
-      showDetailsModal(
-        '⚠️ Точки без адреса',
-        notFoundList,
-        'Для этих координат не удалось определить адрес. В CSV записано "Адрес не найден".'
-      );
-    }, 500);
-  }
+  if (notFoundList.length > 0) setTimeout(() => showDetailsModal('⚠️ Без адреса', notFoundList, 'В CSV: "Адрес не найден"'), 500);
 }
 
 async function exportTXTAddresses() {
-  if (state.points.length === 0) {
-    UI.toast('Нет точек для выгрузки', 'warning');
-    return;
-  }
+  const pts = filteredPoints();
+  if (!pts.length) { UI.toast('Нет точек для экспорта', 'warning'); return; }
   
   const modal = document.getElementById('progressModal');
-  const progressBar = document.getElementById('progressBar');
-  const progressText = document.getElementById('progressText');
-  const progressDetail = document.getElementById('progressDetail');
-  const cancelBtn = document.getElementById('progressCancelBtn');
-  const title = document.getElementById('progressTitle');
-  
   modal.classList.add('show');
-  title.textContent = '📤 Экспорт TXT (адреса)';
-  progressText.textContent = 'Подготовка...';
-  progressDetail.textContent = '';
-  cancelBtn.style.display = 'inline-block';
-  cancelBtn.textContent = 'Отмена';
+  document.getElementById('progressTitle').textContent = ' Экспорт TXT адресов';
+  document.getElementById('progressText').textContent = 'Подготовка...';
+  document.getElementById('progressCancelBtn').textContent = 'Отмена';
   
   let cancelled = false;
   currentOperation = () => { cancelled = true; };
   
   const cache = Storage.getAddressCache();
-  const total = state.points.length;
+  const total = pts.length;
   const addresses = [];
-  let cached = 0, fetched = 0, notFound = 0;
-  const notFoundList = [];
   
   for (let i = 0; i < total; i++) {
-    if (cancelled) {
-      progressText.textContent = 'Отменено пользователем';
-      progressDetail.textContent = `Обработано ${i} из ${total} точек`;
-      await sleep(1500);
-      modal.classList.remove('show');
-      currentOperation = null;
-      return;
-    }
-    
-    const point = state.points[i];
-    const key = Utils.cacheKey(point.lat, point.lng);
-    const wasCached = !!cache[key];
-    const percent = Math.round(((i + 1) / total) * 100);
-    
-    progressBar.style.width = percent + '%';
-    progressText.textContent = `Обработка ${i + 1} из ${total} (${percent}%)`;
-    progressDetail.textContent = 'Запрос адреса...';
-    
+    if (cancelled) { await sleep(1000); modal.classList.remove('show'); currentOperation = null; return; }
+    const point = pts[i];
     const addr = await reverseGeocode(point.lat, point.lng, cache);
-    
-    if (wasCached) cached++; else fetched++;
-    if (addr.found) {
-      addresses.push(`${addr.city}, ${addr.address}`);
-    } else {
-      notFound++;
-      addresses.push(`Адрес не найден (${point.lat.toFixed(6)}, ${point.lng.toFixed(6)})`);
-      notFoundList.push(`${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}`);
-    }
-    
-    progressDetail.textContent = addr.found
-      ? `✓ ${addr.city}, ${addr.address} ${wasCached ? '(из кэша)' : ''}`
-      : `✗ ${addr.city} — ${addr.address}`;
-    
-    if (i < total - 1 && !wasCached) {
-      await sleep(1000);
-    }
+    if (addr.found) addresses.push(`${addr.city}, ${addr.address}`);
+    else addresses.push(`Адрес не найден (${point.lat.toFixed(6)}, ${point.lng.toFixed(6)})`);
+    const percent = Math.round(((i + 1) / total) * 100);
+    document.getElementById('progressBar').style.width = percent + '%';
+    document.getElementById('progressText').textContent = `${i + 1} из ${total}`;
+    if (i < total - 1 && !cache[Utils.cacheKey(point.lat, point.lng)]) await sleep(1000);
   }
   
-  progressText.textContent = 'Формирование TXT...';
-  progressDetail.textContent = 'Почти готово!';
-  progressBar.style.width = '100%';
-  await sleep(500);
-  
-  const txtContent = addresses.join('\n');
-  const blob = new Blob([txtContent], {type: 'text/plain;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
+  const blob = new Blob([addresses.join('\n')], {type: 'text/plain;charset=utf-8'});
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = 'promo_addresses_' + new Date().toISOString().slice(0,10) + '.txt';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   
-  progressText.textContent = '✓ Готово!';
-  progressDetail.textContent = `Выгружено ${total} адресов (кэш: ${cached}, новых: ${fetched}). Файл скачан.`;
-  cancelBtn.style.display = 'none';
+  document.getElementById('progressCancelBtn').style.display = 'none';
   currentOperation = null;
-  await sleep(1500);
+  await sleep(800);
   modal.classList.remove('show');
   
-  let msg = `TXT выгружен: ${total} адресов (из кэша: ${cached}, новых: ${fetched})`;
-  if (notFound > 0) msg += `, ${notFound} без адреса`;
+  let msg = `TXT: ${total} адресов`;
+  if (state.activeFilter !== 'all') msg += ` · фильтр: ${total} из ${state.points.length}`;
   UI.toast(msg, 'success');
-  
-  if (notFoundList.length > 0) {
-    setTimeout(() => {
-      showDetailsModal(
-        '⚠️ Точки без адреса',
-        notFoundList,
-        'Для этих координат не удалось определить адрес. В TXT записано "Адрес не найден".'
-      );
-    }, 500);
-  }
 }
 
 window.cancelOperation = function() {
@@ -2089,21 +1869,16 @@ const MapModule = {
   },
   
   setBasemap(key) {
-    if (!BASEMAPS[key]) key = '2gis';
+    if (!BASEMAPS[key]) key = 'google';
     const bm = BASEMAPS[key];
-    
     currentTiles.forEach(t => { try { map.removeLayer(t); } catch(e){} });
     currentTiles = [];
-    
     bm.layers.forEach(cfg => {
       try {
         const t = L.tileLayer(cfg.url, cfg.opts).addTo(map);
         currentTiles.push(t);
-      } catch(err) {
-        UI.toast('Не удалось загрузить карту', 'error');
-      }
+      } catch(err) { UI.toast('Не удалось загрузить карту', 'error'); }
     });
-    
     state.basemap = key;
     document.querySelectorAll('.basemap-selector button').forEach(b => {
       b.classList.toggle('active', b.dataset.basemap === key);
@@ -2125,11 +1900,7 @@ const MapModule = {
     state.counter++;
     const point = {
       id: state.counter,
-      lat,
-      lng,
-      photo: photoData,
-      source,
-      filename,
+      lat, lng, photo: photoData, source, filename,
       timestamp: new Date().toISOString(),
       color: color || DEFAULT_COLOR
     };
@@ -2138,10 +1909,7 @@ const MapModule = {
     this.updateStats();
     Storage.save(this.serializeProject());
     
-    HistoryManager.push({
-      type: 'add',
-      point: this._serializePoint(point)
-    });
+    HistoryManager.push({ type: 'add', point: this._serializePoint(point) });
     
     if (!state.firstPointAdded && source !== 'manual') {
       state.firstPointAdded = true;
@@ -2155,15 +1923,10 @@ const MapModule = {
   
   restorePoint(serializedPoint) {
     if (state.points.some(p => p.id === serializedPoint.id)) return;
-    
     const point = {
-      id: serializedPoint.id,
-      lat: serializedPoint.lat,
-      lng: serializedPoint.lng,
-      photo: serializedPoint.photo,
-      source: serializedPoint.source,
-      filename: serializedPoint.filename,
-      timestamp: serializedPoint.timestamp,
+      id: serializedPoint.id, lat: serializedPoint.lat, lng: serializedPoint.lng,
+      photo: serializedPoint.photo, source: serializedPoint.source,
+      filename: serializedPoint.filename, timestamp: serializedPoint.timestamp,
       color: serializedPoint.color || DEFAULT_COLOR
     };
     state.points.push(point);
@@ -2182,8 +1945,7 @@ const MapModule = {
   movePointInternal(id, lat, lng) {
     const point = state.points.find(p => p.id === id);
     if (point) {
-      point.lat = lat;
-      point.lng = lng;
+      point.lat = lat; point.lng = lng;
       if (point.marker) {
         point.marker.setLatLng([lat, lng]);
         point.marker.setPopupContent(this.createPopupContent(point));
@@ -2196,13 +1958,7 @@ const MapModule = {
     if (point) {
       point.color = color;
       if (point.marker) {
-        point.marker.setStyle({
-          fillColor: color,
-          color: '#ffffff',
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.9
-        });
+        point.marker.setStyle({ fillColor: color, color: '#ffffff', weight: 2, opacity: 1, fillOpacity: 0.9 });
         point.marker.setPopupContent(this.createPopupContent(point));
       }
     }
@@ -2210,27 +1966,23 @@ const MapModule = {
   
   _serializePoint(point) {
     return {
-      id: point.id,
-      lat: point.lat,
-      lng: point.lng,
-      photo: point.photo,
-      source: point.source,
-      filename: point.filename,
-      timestamp: point.timestamp,
-      color: point.color
+      id: point.id, lat: point.lat, lng: point.lng, photo: point.photo,
+      source: point.source, filename: point.filename,
+      timestamp: point.timestamp, color: point.color
     };
   },
   
   createMarker(point) {
     const radius = this.getMarkerRadius();
     const marker = L.circleMarker([point.lat, point.lng], {
-      radius,
-      fillColor: point.color || DEFAULT_COLOR,
-      color: '#ffffff',
-      weight: 2,
-      opacity: 1,
-      fillOpacity: 0.9
-    }).addTo(map);
+      radius, fillColor: point.color || DEFAULT_COLOR,
+      color: '#ffffff', weight: 2, opacity: 1, fillOpacity: 0.9
+    });
+    
+    if (isPointVisible(point)) {
+      marker.addTo(map);
+    }
+    
     point.marker = marker;
     marker.bindPopup(this.createPopupContent(point));
     marker.on('click', () => {
@@ -2238,7 +1990,6 @@ const MapModule = {
         marker.setPopupContent(this.createPopupContent(point));
       }
     });
-    
     marker.on('mousedown', (e) => {
       if (state.moveMode) {
         e.originalEvent.preventDefault();
@@ -2251,11 +2002,7 @@ const MapModule = {
   
   updateMarkersSize() {
     const radius = this.getMarkerRadius();
-    state.points.forEach(p => {
-      if (p.marker) {
-        p.marker.setRadius(radius);
-      }
-    });
+    state.points.forEach(p => { if (p.marker) p.marker.setRadius(radius); });
   },
   
   createPopupContent(point) {
@@ -2268,15 +2015,17 @@ const MapModule = {
       'address': {text:'📍 Импорт адреса', cls:'address'}
     };
     const src = sourceLabels[point.source] || {text:point.source, cls:'manual'};
+    const colorObj = COLOR_PALETTE.find(c => c.hex === point.color);
+    const colorName = colorObj ? colorObj.name : '';
+    
     let html = '<div>';
     html += '<div class="popup-title">Точка #' + point.id + '</div>';
     html += '<div class="popup-coords">' + point.lat.toFixed(6) + ', ' + point.lng.toFixed(6) + '</div>';
     html += '<div class="popup-source ' + src.cls + '">' + src.text + '</div>';
-    if (point.color && point.color !== DEFAULT_COLOR) {
-      const colorName = COLOR_PALETTE.find(c => c.hex === point.color)?.name || '';
-      html += '<div style="display:inline-block;width:12px;height:12px;background:' + point.color + ';border:1px solid #ccc;border-radius:2px;margin-right:4px;vertical-align:middle;"></div>';
-      html += '<span style="font-size:10px;color:#666;">' + point.color + (colorName ? ' (' + colorName + ')' : '') + '</span>';
-    }
+    html += '<div style="display:inline-flex;align-items:center;gap:4px;margin:4px 0">';
+    html += '<div style="width:12px;height:12px;background:' + (point.color || DEFAULT_COLOR) + ';border:1px solid #ccc;border-radius:2px"></div>';
+    html += '<span style="font-size:10px;color:#666">' + (point.color || DEFAULT_COLOR) + (colorName ? ' · ' + colorName : '') + '</span>';
+    html += '</div>';
     if (point.filename) html += '<div class="popup-coords" style="font-size:10px">' + Utils.escapeHtml(point.filename) + '</div>';
     if (point.photo) html += '<img src="' + point.photo + '" alt="Фото">';
     html += '<button class="delete-btn" onclick="PROMO_APP.deletePoint(' + point.id + ')">Удалить</button>';
@@ -2289,16 +2038,11 @@ const MapModule = {
     if (idx >= 0) {
       const point = state.points[idx];
       const serialized = this._serializePoint(point);
-      
       if (point.marker) { try { map.removeLayer(point.marker); } catch(e){} }
       state.points.splice(idx, 1);
-      
-      HistoryManager.push({
-        type: 'delete',
-        point: serialized
-      });
-      
+      HistoryManager.push({ type: 'delete', point: serialized });
       this.updateStats();
+      applyFilterToMarkers();
       Storage.save(this.serializeProject());
       UI.toast('Точка удалена', 'success');
     }
@@ -2309,13 +2053,15 @@ const MapModule = {
     const fromExif = state.points.filter(p => p.source === 'exif').length;
     const fromFilename = state.points.filter(p => p.source === 'filename').length;
     const fromAddress = state.points.filter(p => p.source === 'address').length;
-    const fromManual = state.points.filter(p => ['manual','kml','txt'].includes(p.source)).length;
+    const fromManual = state.points.filter(p => p.source === 'manual').length;
+    const fromImport = state.points.filter(p => ['kml','txt'].includes(p.source)).length;
     const noGps = state.photosWithoutGps.length;
     document.getElementById('totalCount').textContent = total;
     document.getElementById('fromExifCount').textContent = fromExif;
     document.getElementById('fromFilenameCount').textContent = fromFilename;
     document.getElementById('fromAddressCount').textContent = fromAddress;
     document.getElementById('fromManualCount').textContent = fromManual;
+    document.getElementById('fromImportCount').textContent = fromImport;
     document.getElementById('noGpsCount').textContent = noGps;
   },
   
@@ -2323,33 +2069,26 @@ const MapModule = {
     return {
       version: APP_VERSION,
       points: state.points.map(p => ({
-        id:p.id,
-        lat:p.lat,
-        lng:p.lng,
-        photo:p.photo,
-        source:p.source,
-        filename:p.filename,
-        timestamp:p.timestamp,
-        color:p.color
+        id:p.id, lat:p.lat, lng:p.lng, photo:p.photo, source:p.source,
+        filename:p.filename, timestamp:p.timestamp, color:p.color
       })),
       photosWithoutGps: state.photosWithoutGps,
       counter: state.counter,
       basemap: state.basemap,
-      markerSize: state.markerSize
+      markerSize: state.markerSize,
+      activeFilter: state.activeFilter
     };
   },
   
   loadProject(data) {
-    state.points.forEach(p => {
-      if (p.marker) {
-        try { map.removeLayer(p.marker); } catch(e){}
-      }
-    });
+    state.points.forEach(p => { if (p.marker) { try { map.removeLayer(p.marker); } catch(e){} } });
     state.points = [];
     state.photosWithoutGps = data.photosWithoutGps || [];
     state.counter = data.counter || 0;
-    state.basemap = data.basemap || '2gis';
+    state.basemap = data.basemap || 'google';
+    if (!BASEMAPS[state.basemap]) state.basemap = 'google';
     state.markerSize = data.markerSize || 8;
+    state.activeFilter = data.activeFilter || 'all';
     state.firstPointAdded = false;
     
     document.getElementById('sizeSlider').value = state.markerSize;
@@ -2357,156 +2096,121 @@ const MapModule = {
     
     data.points.forEach(pd => {
       const point = {
-        id:pd.id,
-        lat:pd.lat,
-        lng:pd.lng,
-        photo:pd.photo,
-        source:pd.source||'exif',
-        filename:pd.filename||'',
-        timestamp:pd.timestamp,
-        color:pd.color || DEFAULT_COLOR
+        id:pd.id, lat:pd.lat, lng:pd.lng, photo:pd.photo,
+        source:pd.source||'exif', filename:pd.filename||'',
+        timestamp:pd.timestamp, color:pd.color || DEFAULT_COLOR
       };
       state.points.push(point);
       this.createMarker(point);
     });
     this.setBasemap(state.basemap);
     this.updateStats();
-    
     HistoryManager.clear();
     
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (state.activeFilter === 'all') {
+      const allBtn = document.querySelector('.filter-btn.all');
+      if (allBtn) allBtn.classList.add('active');
+    } else {
+      const colorBtn = document.querySelector(`.filter-btn[data-color="${state.activeFilter}"]`);
+      if (colorBtn) colorBtn.classList.add('active');
+    }
+    applyFilterToMarkers();
+    
     if (state.points.length > 0) {
-      const bounds = L.latLngBounds(state.points.map(p => [p.lat, p.lng]));
-      map.fitBounds(bounds.pad(0.2));
+      try {
+        const bounds = L.latLngBounds(state.points.map(p => [p.lat, p.lng]));
+        map.fitBounds(bounds.pad(0.2));
+      } catch(e){}
       state.firstPointAdded = true;
     }
   },
   
   clearAll() {
-    if (state.points.length === 0) {
-      UI.toast('Нечего очищать', 'info');
-      return;
-    }
-    
+    if (state.points.length === 0) { UI.toast('Нечего очищать', 'info'); return; }
+    if (!confirm('Очистить все данные?')) return;
     const allPoints = state.points.map(p => this._serializePoint(p));
-    
-    HistoryManager.push({
-      type: 'clear',
-      points: allPoints
-    });
-    
+    HistoryManager.push({ type: 'clear', points: allPoints });
     this.clearAllInternal();
     UI.toast('Все данные очищены', 'success');
   },
   
   clearAllInternal() {
-    state.points.forEach(p => {
-      if (p.marker) {
-        try { map.removeLayer(p.marker); } catch(e){}
-      }
-    });
+    state.points.forEach(p => { if (p.marker) { try { map.removeLayer(p.marker); } catch(e){} } });
     state.points = [];
     state.photosWithoutGps = [];
     state.counter = 0;
     state.firstPointAdded = false;
     this.updateStats();
+    applyFilterToMarkers();
     Storage.save(this.serializeProject());
   }
 };
 
 const SelectionModule = {
   init() {
-    this.buildColorPalette();
     this.attachMapEvents();
   },
   
-  buildColorPalette() {
-    const panel = document.getElementById('colorPanel');
-    COLOR_PALETTE.forEach(color => {
-      const swatch = document.createElement('div');
-      swatch.className = 'color-swatch';
-      swatch.style.backgroundColor = color.hex;
-      swatch.dataset.hex = color.hex;
-      swatch.title = color.name;
-      
-      const tooltip = document.createElement('div');
-      tooltip.className = 'swatch-tooltip';
-      tooltip.textContent = color.name;
-      swatch.appendChild(tooltip);
-      
-      swatch.addEventListener('mousedown', (e) => e.stopPropagation());
-      swatch.addEventListener('pointerdown', (e) => e.stopPropagation());
-      swatch.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.selectColor(color.hex);
-      });
-      
-      panel.appendChild(swatch);
+  applyColorToSelected(color) {
+    if (state.selectedPoints.length === 0) return;
+    const changes = state.selectedPoints.map(point => ({
+      id: point.id, oldColor: point.color, newColor: color
+    }));
+    
+    state.selectedPoints.forEach(point => {
+      point.color = color;
+      if (point.marker) {
+        point.marker.setStyle({ fillColor: color, color: '#ffffff', weight: 4, opacity: 1, fillOpacity: 1 });
+      }
     });
-    this.updateSwatchSelection(COLOR_PALETTE[0].hex);
-  },
-  
-  selectColor(hex) {
-    state.activeColor = hex;
-    this.updateSwatchSelection(hex);
-    if (state.selectedPoints.length > 0) {
-      this.applyColorToSelected(hex);
-    }
-  },
-  
-  updateSwatchSelection(hex) {
-    document.querySelectorAll('.color-swatch').forEach(s => {
-      s.classList.toggle('selected', s.dataset.hex === hex);
-    });
+    
+    HistoryManager.push({ type: 'multiColor', changes: changes });
+    
+    const colorName = COLOR_PALETTE.find(c => c.hex === color)?.name || '';
+    UI.toast(`✓ Перекрашено ${state.selectedPoints.length} точек в "${colorName}"`, 'success', 3000);
+    
+    applyFilterToMarkers();
+    Storage.save(MapModule.serializeProject());
   },
   
   toggleMode() {
     state.selectionMode = !state.selectionMode;
     const btn = document.getElementById('selectionBtn');
-    const colorPanel = document.getElementById('colorPanel');
     const indicator = document.getElementById('selectionIndicator');
     const mapEl = document.getElementById('map');
     
     if (state.selectionMode) {
       if (state.manualMode) window.toggleManualMode();
       if (state.moveMode) MoveModule.toggleMode();
-      
       map.off('click', MapModule._clickHandler);
-      
       btn.classList.add('selection-active');
       btn.textContent = '✕ Выход';
-      colorPanel.classList.add('show');
       indicator.classList.add('show');
       mapEl.classList.add('selection-mode');
-      
       map.dragging.disable();
       map.scrollWheelZoom.disable();
       map.doubleClickZoom.disable();
       map.touchZoom.disable();
       map.boxZoom.disable();
       map.keyboard.disable();
-      
       map.closePopup();
-      
       state.isDrawing = false;
       state.selectionStartPoint = null;
-      
-      UI.toast('Режим выделения: нарисуйте прямоугольник мышью', 'info', 3000);
+      state.selectedPoints = [];
+      UI.toast('Режим выделения: зум кнопками +/−, рисуйте прямоугольник, затем кликните по цвету слева для перекраски', 'info', 3500);
     } else {
       btn.classList.remove('selection-active');
       btn.textContent = '🎯 Выделить';
-      colorPanel.classList.remove('show');
       indicator.classList.remove('show');
       mapEl.classList.remove('selection-mode');
-      
       map.on('click', MapModule._clickHandler);
-      
       map.dragging.enable();
       map.scrollWheelZoom.enable();
       map.doubleClickZoom.enable();
       map.touchZoom.enable();
       map.boxZoom.enable();
       map.keyboard.enable();
-      
       this.clearSelection();
     }
   },
@@ -2516,64 +2220,42 @@ const SelectionModule = {
       if (!state.selectionMode) return;
       if (!map.getContainer().contains(e.target)) return;
       if (e.button !== 0) return;
-      
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
-      
-      const latlng = map.mouseEventToLatLng(e);
-      this.startDrawing(latlng);
+      this.startDrawing(map.mouseEventToLatLng(e));
     }, true);
     
     document.addEventListener('mousemove', (e) => {
       if (!state.selectionMode || !state.isDrawing) return;
       if (!map.getContainer().contains(e.target)) return;
-      
       e.preventDefault();
       e.stopPropagation();
-      
-      const latlng = map.mouseEventToLatLng(e);
-      this.updateDrawing(latlng);
+      this.updateDrawing(map.mouseEventToLatLng(e));
     }, true);
     
     document.addEventListener('mouseup', (e) => {
       if (!state.selectionMode || !state.isDrawing) return;
-      
       e.preventDefault();
       e.stopPropagation();
-      
       this.finishDrawing();
     }, true);
     
-    window.addEventListener('blur', () => {
-      if (state.isDrawing) {
-        this.finishDrawing();
-      }
-    });
+    window.addEventListener('blur', () => { if (state.isDrawing) this.finishDrawing(); });
     
     document.addEventListener('contextmenu', (e) => {
-      if (state.selectionMode && map.getContainer().contains(e.target)) {
-        e.preventDefault();
-      }
+      if (state.selectionMode && map.getContainer().contains(e.target)) e.preventDefault();
     }, true);
   },
   
   startDrawing(latlng) {
     this.clearSelection(true);
-    
     state.selectionStartPoint = latlng;
     state.isDrawing = true;
-    
-    if (state.selectionRect) {
-      try { map.removeLayer(state.selectionRect); } catch(err){}
-    }
-    
+    if (state.selectionRect) { try { map.removeLayer(state.selectionRect); } catch(err){} }
     state.selectionRect = L.rectangle([latlng, latlng], {
-      color: '#f59e0b',
-      weight: 2,
-      fillOpacity: 0.2,
-      dashArray: '5, 5',
-      interactive: false
+      color: '#f59e0b', weight: 2, fillOpacity: 0.2,
+      dashArray: '5, 5', interactive: false
     }).addTo(map);
   },
   
@@ -2583,20 +2265,12 @@ const SelectionModule = {
   },
   
   finishDrawing() {
-    if (!state.selectionRect) {
-      state.isDrawing = false;
-      return;
-    }
-    
+    if (!state.selectionRect) { state.isDrawing = false; return; }
     const bounds = state.selectionRect.getBounds();
-    const sw = bounds.getSouthWest();
-    const ne = bounds.getNorthEast();
-    const minSize = 0.0001;
-    
-    if (Math.abs(ne.lat - sw.lat) > minSize || Math.abs(ne.lng - sw.lng) > minSize) {
+    const sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
+    if (Math.abs(ne.lat - sw.lat) > 0.0001 || Math.abs(ne.lng - sw.lng) > 0.0001) {
       this.selectPointsInBounds(bounds);
     }
-    
     try { map.removeLayer(state.selectionRect); } catch(err){}
     state.selectionRect = null;
     state.selectionStartPoint = null;
@@ -2606,6 +2280,7 @@ const SelectionModule = {
   selectPointsInBounds(bounds) {
     state.selectedPoints = [];
     state.points.forEach(point => {
+      if (!isPointVisible(point)) return;
       const latlng = L.latLng(point.lat, point.lng);
       if (bounds.contains(latlng)) {
         state.selectedPoints.push(point);
@@ -2614,73 +2289,24 @@ const SelectionModule = {
     });
     
     if (state.selectedPoints.length > 0) {
-      const colorName = COLOR_PALETTE.find(c => c.hex === state.activeColor)?.name || '';
-      UI.toast(`Выделено точек: ${state.selectedPoints.length}. Цвет: ${colorName}. Можете выбрать другой.`, 'info', 3000);
-      this.applyColorToSelected(state.activeColor);
+      UI.toast(`Выделено: ${state.selectedPoints.length}. Кликните по цвету слева для перекраски.`, 'info', 3000);
     } else {
-      UI.toast('В выделенной области нет точек', 'warning', 2000);
+      UI.toast('В выделенной области нет видимых точек', 'warning', 2000);
     }
   },
   
   highlightPoint(point, highlight) {
     if (!point.marker) return;
     if (highlight) {
-      point.marker.setStyle({
-        color: '#ffffff',
-        weight: 4,
-        opacity: 1,
-        fillOpacity: 1
-      });
+      point.marker.setStyle({ color: '#ffffff', weight: 4, opacity: 1, fillOpacity: 1 });
     } else {
-      point.marker.setStyle({
-        color: '#ffffff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.9
-      });
+      point.marker.setStyle({ color: '#ffffff', weight: 2, opacity: 1, fillOpacity: 0.9 });
     }
-  },
-  
-  applyColorToSelected(color) {
-    if (state.selectedPoints.length === 0) return;
-    
-    const changes = state.selectedPoints.map(point => ({
-      id: point.id,
-      oldColor: point.color,
-      newColor: color
-    }));
-    
-    state.selectedPoints.forEach(point => {
-      point.color = color;
-      if (point.marker) {
-        point.marker.setStyle({
-          fillColor: color,
-          color: '#ffffff',
-          weight: 4,
-          opacity: 1,
-          fillOpacity: 1
-        });
-      }
-    });
-    
-    HistoryManager.push({
-      type: 'multiColor',
-      changes: changes
-    });
-    
-    const colorName = COLOR_PALETTE.find(c => c.hex === color)?.name || '';
-    UI.toast(`✓ Перекрашено ${state.selectedPoints.length} точек в "${colorName}"`, 'success', 3000);
-    
-    Storage.save(MapModule.serializeProject());
   },
   
   clearSelection(clearState = true) {
-    state.selectedPoints.forEach(point => {
-      this.highlightPoint(point, false);
-    });
-    if (clearState) {
-      state.selectedPoints = [];
-    }
+    state.selectedPoints.forEach(point => this.highlightPoint(point, false));
+    if (clearState) state.selectedPoints = [];
     if (state.selectionRect) {
       try { map.removeLayer(state.selectionRect); } catch(err){}
       state.selectionRect = null;
@@ -2691,9 +2317,7 @@ const SelectionModule = {
 };
 
 const MoveModule = {
-  init() {
-    this.attachEvents();
-  },
+  init() { this.attachEvents(); },
   
   toggleMode() {
     state.moveMode = !state.moveMode;
@@ -2704,74 +2328,49 @@ const MoveModule = {
     if (state.moveMode) {
       if (state.manualMode) window.toggleManualMode();
       if (state.selectionMode) SelectionModule.toggleMode();
-      
       map.off('click', MapModule._clickHandler);
-      
       btn.classList.add('move-active');
       btn.textContent = '✕ Выход';
       indicator.classList.add('show');
       mapEl.classList.add('move-mode');
-      
       map.dragging.disable();
       map.scrollWheelZoom.disable();
       map.doubleClickZoom.disable();
       map.touchZoom.disable();
       map.boxZoom.disable();
       map.keyboard.disable();
-      
       map.closePopup();
-      
       state.movingPoint = null;
       state.isMoving = false;
-      
-      UI.toast('Режим перемещения: кликните на точку для начала перемещения', 'info', 3000);
+      UI.toast('Режим перемещения: кликните на точку', 'info', 3000);
     } else {
       btn.classList.remove('move-active');
       btn.textContent = '🔄 Двигать';
       indicator.classList.remove('show');
       mapEl.classList.remove('move-mode', 'moving');
-      
       map.on('click', MapModule._clickHandler);
-      
       map.dragging.enable();
       map.scrollWheelZoom.enable();
       map.doubleClickZoom.enable();
       map.touchZoom.enable();
       map.boxZoom.enable();
       map.keyboard.enable();
-      
       this.cancelMoving();
     }
   },
   
   startMoving(point) {
-    if (state.isMoving && state.movingPoint && state.movingPoint !== point) {
-      this.finishMoving();
-    }
-    
-    if (state.isMoving && state.movingPoint === point) {
-      this.finishMoving();
-      return;
-    }
-    
+    if (state.isMoving && state.movingPoint && state.movingPoint !== point) this.finishMoving();
+    if (state.isMoving && state.movingPoint === point) { this.finishMoving(); return; }
     state.movingPoint = point;
     state.isMoving = true;
-    
     this._oldLat = point.lat;
     this._oldLng = point.lng;
-    
     if (point.marker) {
-      point.marker.setStyle({
-        color: '#000000',
-        weight: 5,
-        opacity: 1,
-        fillOpacity: 1
-      });
+      point.marker.setStyle({ color: '#000000', weight: 5, opacity: 1, fillOpacity: 1 });
     }
-    
     document.getElementById('map').classList.add('moving');
-    
-    UI.toast(`Точка #${point.id} выбрана. Переместите курсор и кликните для фиксации.`, 'info', 2500);
+    UI.toast(`Точка #${point.id} выбрана. Переместите и кликните.`, 'info', 2500);
   },
   
   updateMoving(latlng) {
@@ -2781,41 +2380,22 @@ const MoveModule = {
   
   finishMoving() {
     if (!state.isMoving || !state.movingPoint) return;
-    
     const point = state.movingPoint;
     const marker = point.marker;
-    
     if (marker) {
       const newLatLng = marker.getLatLng();
-      const oldLat = this._oldLat;
-      const oldLng = this._oldLng;
-      
       HistoryManager.push({
-        type: 'move',
-        id: point.id,
-        oldLat: oldLat,
-        oldLng: oldLng,
-        newLat: newLatLng.lat,
-        newLng: newLatLng.lng
+        type: 'move', id: point.id,
+        oldLat: this._oldLat, oldLng: this._oldLng,
+        newLat: newLatLng.lat, newLng: newLatLng.lng
       });
-      
       point.lat = newLatLng.lat;
       point.lng = newLatLng.lng;
-      
-      marker.setStyle({
-        color: '#ffffff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.9
-      });
-      
+      marker.setStyle({ color: '#ffffff', weight: 2, opacity: 1, fillOpacity: 0.9 });
       marker.setPopupContent(MapModule.createPopupContent(point));
-      
       Storage.save(MapModule.serializeProject());
-      
       UI.toast(`✓ Точка #${point.id} перемещена`, 'success', 2500);
     }
-    
     state.movingPoint = null;
     state.isMoving = false;
     document.getElementById('map').classList.remove('moving');
@@ -2823,18 +2403,11 @@ const MoveModule = {
   
   cancelMoving() {
     if (!state.isMoving || !state.movingPoint) return;
-    
     const point = state.movingPoint;
     if (point.marker) {
       point.marker.setLatLng([this._oldLat, this._oldLng]);
-      point.marker.setStyle({
-        color: '#ffffff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.9
-      });
+      point.marker.setStyle({ color: '#ffffff', weight: 2, opacity: 1, fillOpacity: 0.9 });
     }
-    
     state.movingPoint = null;
     state.isMoving = false;
     document.getElementById('map').classList.remove('moving');
@@ -2844,33 +2417,21 @@ const MoveModule = {
     document.addEventListener('mousemove', (e) => {
       if (!state.moveMode || !state.isMoving) return;
       if (!map.getContainer().contains(e.target)) return;
-      
       e.preventDefault();
       e.stopPropagation();
-      
-      const latlng = map.mouseEventToLatLng(e);
-      this.updateMoving(latlng);
+      this.updateMoving(map.mouseEventToLatLng(e));
     }, true);
     
     document.addEventListener('click', (e) => {
       if (!state.moveMode || !state.isMoving) return;
       if (!map.getContainer().contains(e.target)) return;
-      
-      if (e.target.classList && e.target.classList.contains('leaflet-interactive')) {
-        return;
-      }
-      
+      if (e.target.classList && e.target.classList.contains('leaflet-interactive')) return;
       e.preventDefault();
       e.stopPropagation();
-      
       this.finishMoving();
     }, true);
     
-    window.addEventListener('blur', () => {
-      if (state.isMoving) {
-        this.cancelMoving();
-      }
-    });
+    window.addEventListener('blur', () => { if (state.isMoving) this.cancelMoving(); });
   }
 };
 
@@ -2940,8 +2501,9 @@ const PhotoModule = {
 };
 
 window.exportKML = function() {
-  if (!state.points.length) { UI.toast('Нет точек', 'info'); return; }
-  const placemarks = state.points.map(p => {
+  const pts = filteredPoints();
+  if (!pts.length) { UI.toast('Нет точек для экспорта', 'warning'); return; }
+  const placemarks = pts.map(p => {
     return `<Placemark>
   <name>${Utils.escapeHtml(p.filename || 'Точка ' + p.id)}</name>
   <Point>
@@ -2963,12 +2525,15 @@ ${placemarks}
   a.href = URL.createObjectURL(blob);
   a.download = 'promo_map_' + Date.now() + '.kml';
   a.click();
-  UI.toast('Одноцветный KML экспортирован', 'success');
+  let msg = `Одноцветный KML: ${pts.length} точек`;
+  if (state.activeFilter !== 'all') msg += ` (фильтр: ${pts.length} из ${state.points.length})`;
+  UI.toast(msg, 'success');
 };
 
 window.exportKMLColor = function() {
-  if (!state.points.length) { UI.toast('Нет точек', 'info'); return; }
-  const placemarks = state.points.map(p => {
+  const pts = filteredPoints();
+  if (!pts.length) { UI.toast('Нет точек для экспорта', 'warning'); return; }
+  const placemarks = pts.map(p => {
     const yandexColor = Utils.hexToYandexColor(p.color || DEFAULT_COLOR);
     return `<Placemark>
   <name>${Utils.escapeHtml(p.filename || 'Точка ' + p.id)}</name>
@@ -3005,18 +2570,62 @@ ${placemarks}
   a.href = URL.createObjectURL(blob);
   a.download = 'promo_map_colors_' + Date.now() + '.kml';
   a.click();
-  UI.toast('Цветной KML экспортирован', 'success');
+  let msg = `Цветной KML: ${pts.length} точек`;
+  if (state.activeFilter !== 'all') msg += ` (фильтр: ${pts.length} из ${state.points.length})`;
+  UI.toast(msg, 'success');
+};
+
+window.exportKMLNoNames = function() {
+  const pts = filteredPoints();
+  if (!pts.length) { UI.toast('Нет точек для экспорта', 'warning'); return; }
+  const placemarks = pts.map(p => {
+    const yandexColor = Utils.hexToYandexColor(p.color || DEFAULT_COLOR);
+    return `<Placemark>
+  <Style>
+    <IconStyle>
+      <color>${yandexColor}</color>
+      <Icon>
+        <href>https://api-maps.yandex.ru/i/0.4/micro/pmlbs.png</href>
+      </Icon>
+      <hotSpot x="7" y="28" xunits="pixels" yunits="insetPixels"/>
+    </IconStyle>
+  </Style>
+  <Point>
+    <coordinates>${p.lng.toFixed(8)},${p.lat.toFixed(8)},0</coordinates>
+  </Point>
+</Placemark>`;
+  }).join('\n');
+  const kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+<name><![CDATA[Промо-карта (без названий)]]></name>
+<Folder>
+${placemarks}
+</Folder>
+</Document>
+</kml>`;
+  const blob = new Blob([kml], {type:'application/vnd.google-earth.kml+xml'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'promo_no_names_' + Date.now() + '.kml';
+  a.click();
+  let msg = `KML без названий: ${pts.length} точек`;
+  if (state.activeFilter !== 'all') msg += ` (фильтр: ${pts.length} из ${state.points.length})`;
+  UI.toast(msg, 'success');
 };
 
 window.exportTXTCoords = function() {
-  if (!state.points.length) { UI.toast('Нет точек', 'info'); return; }
-  const lines = state.points.map(p => p.lat.toFixed(6) + ',' + p.lng.toFixed(6));
+  const pts = filteredPoints();
+  if (!pts.length) { UI.toast('Нет точек для экспорта', 'warning'); return; }
+  const lines = pts.map(p => p.lat.toFixed(6) + ',' + p.lng.toFixed(6));
   const blob = new Blob([lines.join('\n')], {type:'text/plain'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'promo_coords_' + Date.now() + '.txt';
   a.click();
-  UI.toast('TXT экспортирован', 'success');
+  let msg = `TXT: ${pts.length} координат`;
+  if (state.activeFilter !== 'all') msg += ` (фильтр: ${pts.length} из ${state.points.length})`;
+  UI.toast(msg, 'success');
 };
 
 window.exportCSVWithAddresses = function() { exportCSVWithAddresses(); };
@@ -3058,7 +2667,6 @@ window.searchLocation = function() {
 window.toggleManualMode = function() {
   if (state.selectionMode) SelectionModule.toggleMode();
   if (state.moveMode) MoveModule.toggleMode();
-  
   state.manualMode = !state.manualMode;
   const btn = document.getElementById('manualBtn');
   const cancelBtn = document.getElementById('cancelManualBtn');
@@ -3075,18 +2683,12 @@ window.toggleManualMode = function() {
 };
 
 window.toggleSelectionMode = function(event) {
-  if (event) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
+  if (event) { event.stopPropagation(); event.preventDefault(); }
   SelectionModule.toggleMode();
 };
 
 window.toggleMoveMode = function(event) {
-  if (event) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
+  if (event) { event.stopPropagation(); event.preventDefault(); }
   MoveModule.toggleMode();
 };
 
@@ -3142,10 +2744,7 @@ uploadSection.addEventListener('drop', e => {
   if (files.length) BatchProcessor.processPhotosBatch(files, 10);
 }, false);
 
-uploadBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  fileInput.click();
-});
+uploadBtn.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
 
 fileInput.addEventListener('change', e => {
   if (e.target.files.length) BatchProcessor.processPhotosBatch(e.target.files, 10);
@@ -3237,9 +2836,12 @@ document.addEventListener('click', e => {
   }
 });
 
+// ===== ИНИЦИАЛИЗАЦИЯ =====
+buildFilterBar();
 MapModule.init();
 SelectionModule.init();
 MoveModule.init();
+
 const saved = Storage.load();
 if (saved && saved.points) {
   MapModule.loadProject(saved);
